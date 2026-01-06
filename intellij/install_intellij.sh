@@ -87,6 +87,25 @@ Categories=Development;IDE;
 StartupNotify=true
 EOF
 
+mkdir -p "$HOME/.local/share/kio/servicemenus"
+SERVICE_MENU="$HOME/.local/share/kio/servicemenus/intellij.desktop"
+
+cat > "$SERVICE_MENU" <<EOF
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=all/all;inode/directory;
+Actions=openInIntelliJ
+X-KDE-Priority=TopLevel
+
+[Desktop Action openInIntelliJ]
+Name=Abrir con IntelliJ IDEA
+Icon=/opt/intellij/bin/idea.svg
+Exec=/opt/intellij/bin/idea.sh %u
+EOF
+
+chmod +x "$SERVICE_MENU" || true
+
 echo -e "${GREEN}¡IntelliJ IDEA $VERSION instalado con éxito!${NC}"
 echo "Comando: idea"
 echo "Desktop: $DESKTOP_FILE"

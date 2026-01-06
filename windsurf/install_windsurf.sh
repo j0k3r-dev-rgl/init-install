@@ -87,6 +87,25 @@ EOF
 
 sudo ln -sf "$BIN_PATH" /usr/local/bin/windsurf || true
 
+mkdir -p "$HOME/.local/share/kio/servicemenus"
+SERVICE_MENU="$HOME/.local/share/kio/servicemenus/windsurf.desktop"
+
+cat > "$SERVICE_MENU" <<EOF
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=all/all;inode/directory;
+Actions=openInWindsurf
+X-KDE-Priority=TopLevel
+
+[Desktop Action openInWindsurf]
+Name=Abrir con Windsurf
+Icon=/opt/windsurf/resources/app/out/media/windsurf-welcome-backgroundsvg.svg
+Exec=/opt/windsurf/windsurf %u
+EOF
+
+chmod +x "$SERVICE_MENU" || true
+
 echo -e "${GREEN}¡Instalación de Windsurf $LATEST_VERSION completada!${NC}"
 echo "Desktop: $DESKTOP_FILE"
 echo "Si no aparece en el menú, ejecuta: update-desktop-database ~/.local/share/applications (si tenés desktop-file-utils)"
