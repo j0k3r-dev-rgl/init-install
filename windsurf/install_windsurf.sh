@@ -101,7 +101,7 @@ X-KDE-Priority=TopLevel
 [Desktop Action openInWindsurf]
 Name=Abrir con Windsurf
 Icon=/opt/windsurf/resources/app/out/media/windsurf-welcome-backgroundsvg.svg
-Exec=/opt/windsurf/windsurf %u
+Exec=/tu/ruta/windsurf --open-url %U
 EOF
 
 chmod +x "$SERVICE_MENU" || true
