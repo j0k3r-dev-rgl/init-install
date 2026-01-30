@@ -32,7 +32,6 @@ Este repositorio contiene un conjunto de scripts **modulares y organizados** par
 - **Dolphin** - Gestor de archivos con soporte USB completo
 - **mpv** - Reproductor de video y audio (optimizado para Wayland)
 - **imv** - Visor de imágenes nativo para Wayland
-- **zathura** - Visor de PDF ligero
 - **Fuentes**: JetBrains Mono Nerd, Font Awesome, Noto Emoji
 
 #### 🔌 Soporte de Dispositivos
@@ -217,7 +216,7 @@ El script principal sigue este orden **optimizado** para evitar problemas:
   - **Imágenes** (jpg, png, gif, etc.) → imv
   - **Videos** (mp4, mkv, webm, etc.) → mpv
   - **Audio** (mp3, flac, ogg, etc.) → mpv
-  - **PDF** → zathura
+  - **PDF** → OnlyOffice (predeterminado) + Chrome (alternativa con clic derecho)
   - **Documentos Office** (docx, xlsx, pptx) → OnlyOffice
   - **Archivos de texto** → Neovim
 
@@ -278,7 +277,6 @@ This repository contains a set of **modular and organized scripts** to automate 
 - **Dolphin** - File manager with full USB support
 - **mpv** - Video and audio player (Wayland optimized)
 - **imv** - Native Wayland image viewer
-- **zathura** - Lightweight PDF viewer
 - **Fonts**: JetBrains Mono Nerd, Font Awesome, Noto Emoji
 
 #### 🔌 Device Support

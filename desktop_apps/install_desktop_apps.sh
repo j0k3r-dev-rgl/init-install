@@ -50,10 +50,4 @@ pacman_install imv
 
 print_success "imv instalado"
 
-# 4. Visor de PDF (zathura - ligero y con soporte Wayland)
-print_info "Instalando zathura (visor de PDF)..."
-pacman_install zathura zathura-pdf-mupdf
-
-print_success "zathura instalado"
-
 print_success "==== Aplicaciones de escritorio instaladas correctamente ===="

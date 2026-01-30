@@ -45,8 +45,28 @@ for mime in audio/mpeg audio/mp4 audio/x-wav audio/flac audio/ogg audio/x-vorbis
     xdg-mime default mpv.desktop "$mime" 2>/dev/null || true
 done
 
-# PDF -> zathura
-xdg-mime default org.pwmt.zathura.desktop application/pdf 2>/dev/null || true
+# PDF -> OnlyOffice (por defecto)
+print_info "Configurando PDF con OnlyOffice como predeterminado..."
+xdg-mime default onlyoffice-desktopeditors.desktop application/pdf 2>/dev/null || true
+
+# Crear archivo de aplicaciones adicionales para PDF
+mkdir -p "$HOME/.local/share/applications"
+
+# Crear entrada para Chrome como visor de PDF alternativo
+cat > "$HOME/.local/share/applications/chrome-pdf.desktop" << 'EOF'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Google Chrome (Visor PDF)
+Comment=Abrir PDF con Google Chrome
+Exec=google-chrome-stable %U
+Icon=google-chrome
+Terminal=false
+MimeType=application/pdf;
+Categories=Office;Viewer;
+EOF
+
+print_success "Configuradas opciones para PDF: OnlyOffice (predeterminado) + Chrome (alternativa)"
 
 # Documentos de oficina -> OnlyOffice
 # Word
@@ -81,6 +101,7 @@ print_info "Aplicaciones configuradas:"
 echo "  • Imágenes (jpg, png, gif, etc.) -> imv"
 echo "  • Videos (mp4, mkv, webm, etc.) -> mpv"
 echo "  • Audio (mp3, flac, ogg, etc.) -> mpv"
-echo "  • PDF -> zathura"
+echo "  • PDF -> OnlyOffice (predeterminado)"
+echo "       -> Chrome (clic derecho -> Abrir con -> Google Chrome)"
 echo "  • Documentos Word/Excel/PowerPoint -> OnlyOffice"
 echo "  • Archivos de texto -> Neovim"
