@@ -540,5 +540,23 @@ else
     die "No se encontró yay, necesario para instalar cloudflare-warp-bin desde AUR."
 fi
 
+if [ -t 0 ] && [ -t 1 ]; then
+    echo -n "¿Deseas instalar opencode.ai (CLI interactiva)? (s/n, por defecto: s): "
+    read -r install_opencode
+    case "$install_opencode" in
+        [nN]|[nN][oO])
+            ;;
+        *)
+            if command -v opencode >/dev/null 2>&1; then
+                print_info "opencode ya está instalado, saltando..."
+            else
+                print_info "Instalando opencode.ai..."
+                curl -fsSL https://opencode.ai/install | bash
+                print_success "opencode.ai instalado exitosamente"
+            fi
+            ;;
+    esac
+fi
+
 echo -e "${GREEN}Instalación finalizada.${NC}"
 echo "Cierra y vuelve a abrir tu terminal (o reinicia tu sesión) para ver todos los cambios."

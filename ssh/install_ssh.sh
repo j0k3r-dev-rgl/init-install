@@ -2,7 +2,7 @@
 
 # ============================================================================
 # Script de instalación y configuración de SSH
-# Instala OpenSSH, copia configuración y opcionalmente genera claves SSH
+# Instala OpenSSH, copia configuración y genera claves SSH
 # ============================================================================
 
 set -euo pipefail
@@ -13,6 +13,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 print_info() {
@@ -25,6 +26,10 @@ print_success() {
 
 print_warning() {
     echo -e "${YELLOW}[ADVERTENCIA]${NC} $*"
+}
+
+print_section() {
+    echo -e "${BLUE}[*]${NC} $*"
 }
 
 die() {
@@ -77,11 +82,9 @@ if [ -f "$SSH_CONFIG_SOURCE" ]; then
             read -r overwrite_config
             case "$overwrite_config" in
                 [sS]|[sS][iI])
-                    # Hacer backup del archivo existente
                     backup_file="${SSH_CONFIG_DEST}.backup.$(date +%Y%m%d_%H%M%S)"
                     cp "$SSH_CONFIG_DEST" "$backup_file"
                     print_info "Backup guardado en: $backup_file"
-                    
                     cp "$SSH_CONFIG_SOURCE" "$SSH_CONFIG_DEST"
                     chmod 600 "$SSH_CONFIG_DEST"
                     print_success "Archivo config copiado y permisos establecidos"
@@ -91,7 +94,6 @@ if [ -f "$SSH_CONFIG_SOURCE" ]; then
                     ;;
             esac
         else
-            # En modo no interactivo, no sobreescribir
             print_warning "Archivo config ya existe. No se sobreescribió"
         fi
     else
@@ -103,90 +105,230 @@ else
     print_warning "No se encontró archivo de configuración en: $SSH_CONFIG_SOURCE"
 fi
 
-# 5. Generar clave SSH (opcional)
+# 4.5. Copiar archivo README con instrucciones
+SSH_README_SOURCE="${SCRIPT_DIR}/readme.md"
+SSH_README_DEST="${HOME}/.ssh/readme.md"
+
+if [ -f "$SSH_README_SOURCE" ]; then
+    print_info "Copiando archivo de instrucciones SSH..."
+    cp "$SSH_README_SOURCE" "$SSH_README_DEST"
+    chmod 644 "$SSH_README_DEST"
+    print_success "Archivo de instrucciones copiado a ~/.ssh/readme.md"
+fi
+
+# 5. Generación de claves SSH (3 claves diferentes)
 if [ -t 0 ] && [ -t 1 ]; then
     echo ""
     echo "============================================"
-    echo "Generación de Clave SSH"
+    print_section "Generación de Claves SSH"
     echo "============================================"
     echo ""
+    echo "Se generarán 3 claves SSH diferentes:"
+    echo "  1. Para servidores (KVM, VPS, etc.)"
+    echo "  2. Para GitHub"
+    echo "  3. Para otros usos (backup, etc.)"
+    echo ""
+    echo -n "¿Deseas generar las claves SSH? (s/n, por defecto: s): "
+    read -r generate_keys
     
-    # Verificar si ya existe la clave
-    SSH_KEY_PATH="${HOME}/.ssh/id_ed25519"
-    
-    if [ -f "$SSH_KEY_PATH" ]; then
-        print_warning "Ya existe una clave SSH en: $SSH_KEY_PATH"
-        echo -n "¿Deseas generar una nueva clave? (Esto sobrescribirá la existente) (s/n, por defecto: n): "
-        read -r generate_new_key
-    else
-        echo -n "¿Deseas generar una clave SSH ed25519 ahora? (s/n, por defecto: s): "
-        read -r generate_new_key
-    fi
-    
-    case "$generate_new_key" in
-        [sS]|[sS][iI])
-            echo ""
-            print_info "Generando clave SSH ed25519..."
-            echo ""
-            
-            # Pedir email para el comentario de la clave
-            echo -n "Ingresa tu email para identificar la clave (opcional, presiona Enter para omitir): "
-            read -r ssh_email
-            
-            if [ -n "$ssh_email" ]; then
-                ssh-keygen -t ed25519 -C "$ssh_email" -f "$SSH_KEY_PATH"
-            else
-                ssh-keygen -t ed25519 -f "$SSH_KEY_PATH"
-            fi
-            
-            # Establecer permisos correctos
-            chmod 600 "$SSH_KEY_PATH"
-            chmod 644 "${SSH_KEY_PATH}.pub"
-            
-            echo ""
-            print_success "Clave SSH generada exitosamente!"
-            echo ""
-            echo "============================================"
-            echo "Tu clave pública es:"
-            echo "============================================"
-            cat "${SSH_KEY_PATH}.pub"
-            echo "============================================"
-            echo ""
-            print_info "Puedes copiar esta clave pública a tus servidores remotos"
-            print_info "Ubicación de la clave privada: $SSH_KEY_PATH"
-            print_info "Ubicación de la clave pública: ${SSH_KEY_PATH}.pub"
-            ;;
+    case "$generate_keys" in
         [nN]|[nN][oO])
-            print_info "Generación de clave SSH omitida"
+            print_info "Generación de claves SSH omitida"
             ;;
         *)
-            if [ -f "$SSH_KEY_PATH" ]; then
-                print_info "Generación de clave SSH omitida (se mantiene la existente)"
+            # --- Clave 1: Para Servidores ---
+            echo ""
+            print_section "Clave 1: Para Servidores"
+            echo ""
+            echo "Esta clave se usará para conectarte a tus servidores (kvm2, kvm4, etc.)"
+            echo -n "Nombre para la clave del servidor [id_ed25519_server]: "
+            read -r key_server_name
+            key_server_name="${key_server_name:-id_ed25519_server}"
+            
+            echo -n "Email para identificar la clave (ej: admin@tudominio.com): "
+            read -r key_server_email
+            
+            SSH_KEY_SERVER="${HOME}/.ssh/${key_server_name}"
+            
+            if [ -f "$SSH_KEY_SERVER" ]; then
+                echo -n "La clave ya existe. ¿Deseas sobreescribirla? (s/n, por defecto: n): "
+                read -r overwrite_server
+                case "$overwrite_server" in
+                    [sS]|[sS][iI])
+                        if [ -n "$key_server_email" ]; then
+                            ssh-keygen -t ed25519 -C "$key_server_email" -f "$SSH_KEY_SERVER"
+                        else
+                            ssh-keygen -t ed25519 -f "$SSH_KEY_SERVER"
+                        fi
+                        ;;
+                    *)
+                        print_info "Manteniendo clave existente del servidor"
+                        ;;
+                esac
             else
-                print_info "Generando clave SSH ed25519 (opción por defecto)..."
-                echo ""
-                
-                echo -n "Ingresa tu email para identificar la clave (opcional, presiona Enter para omitir): "
-                read -r ssh_email
-                
-                if [ -n "$ssh_email" ]; then
-                    ssh-keygen -t ed25519 -C "$ssh_email" -f "$SSH_KEY_PATH"
+                if [ -n "$key_server_email" ]; then
+                    ssh-keygen -t ed25519 -C "$key_server_email" -f "$SSH_KEY_SERVER"
                 else
-                    ssh-keygen -t ed25519 -f "$SSH_KEY_PATH"
+                    ssh-keygen -t ed25519 -f "$SSH_KEY_SERVER"
                 fi
-                
-                chmod 600 "$SSH_KEY_PATH"
-                chmod 644 "${SSH_KEY_PATH}.pub"
-                
-                echo ""
-                print_success "Clave SSH generada exitosamente!"
-                echo ""
-                echo "============================================"
-                echo "Tu clave pública es:"
-                echo "============================================"
-                cat "${SSH_KEY_PATH}.pub"
-                echo "============================================"
             fi
+            
+            if [ -f "$SSH_KEY_SERVER" ]; then
+                chmod 600 "$SSH_KEY_SERVER"
+                chmod 644 "${SSH_KEY_SERVER}.pub"
+                print_success "Clave del servidor generada: $SSH_KEY_SERVER"
+            fi
+            
+            # --- Clave 2: Para GitHub ---
+            echo ""
+            print_section "Clave 2: Para GitHub"
+            echo ""
+            echo "Esta clave se usará para autenticarte con GitHub (git clone, push, etc.)"
+            echo -n "Nombre para la clave de GitHub [id_ed25519_github]: "
+            read -r key_github_name
+            key_github_name="${key_github_name:-id_ed25519_github}"
+            
+            echo -n "Email de tu cuenta de GitHub (debe coincidir con tu email de GitHub): "
+            read -r key_github_email
+            
+            SSH_KEY_GITHUB="${HOME}/.ssh/${key_github_name}"
+            
+            if [ -f "$SSH_KEY_GITHUB" ]; then
+                echo -n "La clave ya existe. ¿Deseas sobreescribirla? (s/n, por defecto: n): "
+                read -r overwrite_github
+                case "$overwrite_github" in
+                    [sS]|[sS][iI])
+                        if [ -n "$key_github_email" ]; then
+                            ssh-keygen -t ed25519 -C "$key_github_email" -f "$SSH_KEY_GITHUB"
+                        else
+                            ssh-keygen -t ed25519 -f "$SSH_KEY_GITHUB"
+                        fi
+                        ;;
+                    *)
+                        print_info "Manteniendo clave existente de GitHub"
+                        ;;
+                esac
+            else
+                if [ -n "$key_github_email" ]; then
+                    ssh-keygen -t ed25519 -C "$key_github_email" -f "$SSH_KEY_GITHUB"
+                else
+                    ssh-keygen -t ed25519 -f "$SSH_KEY_GITHUB"
+                fi
+            fi
+            
+            if [ -f "$SSH_KEY_GITHUB" ]; then
+                chmod 600 "$SSH_KEY_GITHUB"
+                chmod 644 "${SSH_KEY_GITHUB}.pub"
+                print_success "Clave de GitHub generada: $SSH_KEY_GITHUB"
+            fi
+            
+            # --- Clave 3: Para Otros Usos ---
+            echo ""
+            print_section "Clave 3: Para Otros Usos"
+            echo ""
+            echo "Esta clave es para otros propósitos (backup, otros servidores, etc.)"
+            echo -n "Nombre para la clave adicional [id_ed25519_other]: "
+            read -r key_other_name
+            key_other_name="${key_other_name:-id_ed25519_other}"
+            
+            echo -n "Email o identificador para esta clave: "
+            read -r key_other_email
+            
+            SSH_KEY_OTHER="${HOME}/.ssh/${key_other_name}"
+            
+            if [ -f "$SSH_KEY_OTHER" ]; then
+                echo -n "La clave ya existe. ¿Deseas sobreescribirla? (s/n, por defecto: n): "
+                read -r overwrite_other
+                case "$overwrite_other" in
+                    [sS]|[sS][iI])
+                        if [ -n "$key_other_email" ]; then
+                            ssh-keygen -t ed25519 -C "$key_other_email" -f "$SSH_KEY_OTHER"
+                        else
+                            ssh-keygen -t ed25519 -f "$SSH_KEY_OTHER"
+                        fi
+                        ;;
+                    *)
+                        print_info "Manteniendo clave adicional existente"
+                        ;;
+                esac
+            else
+                if [ -n "$key_other_email" ]; then
+                    ssh-keygen -t ed25519 -C "$key_other_email" -f "$SSH_KEY_OTHER"
+                else
+                    ssh-keygen -t ed25519 -f "$SSH_KEY_OTHER"
+                fi
+            fi
+            
+            if [ -f "$SSH_KEY_OTHER" ]; then
+                chmod 600 "$SSH_KEY_OTHER"
+                chmod 644 "${SSH_KEY_OTHER}.pub"
+                print_success "Clave adicional generada: $SSH_KEY_OTHER"
+            fi
+            
+            echo ""
+            echo "============================================"
+            print_success "¡Todas las claves SSH generadas!"
+            echo "============================================"
+            echo ""
+            
+            # Mostrar resumen de claves públicas
+            echo "📋 CLAVES PÚBLICAS GENERADAS:"
+            echo ""
+            
+            if [ -f "${SSH_KEY_SERVER}.pub" ]; then
+                echo "🔐 CLAVE PARA SERVIDORES (${key_server_name}):"
+                echo "----------------------------------------"
+                cat "${SSH_KEY_SERVER}.pub"
+                echo "----------------------------------------"
+                echo ""
+            fi
+            
+            if [ -f "${SSH_KEY_GITHUB}.pub" ]; then
+                echo "🔐 CLAVE PARA GITHUB (${key_github_name}):"
+                echo "----------------------------------------"
+                cat "${SSH_KEY_GITHUB}.pub"
+                echo "----------------------------------------"
+                echo ""
+            fi
+            
+            if [ -f "${SSH_KEY_OTHER}.pub" ]; then
+                echo "🔐 CLAVE ADICIONAL (${key_other_name}):"
+                echo "----------------------------------------"
+                cat "${SSH_KEY_OTHER}.pub"
+                echo "----------------------------------------"
+                echo ""
+            fi
+            ;;
+    esac
+fi
+
+# 6. Configuración de SSH Agent (opcional)
+if [ -t 0 ] && [ -t 1 ]; then
+    echo ""
+    echo "============================================"
+    print_section "Configuración de SSH Agent"
+    echo "============================================"
+    echo ""
+    echo -n "¿Deseas configurar SSH Agent para no ingresar la contraseña constantemente? (s/n, por defecto: s): "
+    read -r setup_agent
+    
+    case "$setup_agent" in
+        [nN]|[nN][oO])
+            print_info "Configuración de SSH Agent omitida"
+            ;;
+        *)
+            echo ""
+            echo "Agrega esto a tu ~/.zshrc o ~/.bashrc para usar SSH Agent automáticamente:"
+            echo ""
+            echo "# SSH Agent - Auto_start"
+            if [ -z "${SSH_AUTH_SOCK:-}" ]; then
+               eval "$(ssh-agent -s)" > /dev/null
+            fi
+            echo ""
+            echo "Para agregar tus claves al agent:"
+            echo "  ssh-add ~/.ssh/id_ed25519_server"
+            echo "  ssh-add ~/.ssh/id_ed25519_github"
+            echo "  ssh-add ~/.ssh/id_ed25519_other"
             ;;
     esac
 fi
@@ -203,17 +345,39 @@ echo "✓ Directorio ~/.ssh configurado con permisos correctos"
 if [ -f "$SSH_CONFIG_DEST" ]; then
     echo "✓ Archivo de configuración SSH copiado en ~/.ssh/config"
 fi
-if [ -f "${HOME}/.ssh/id_ed25519" ]; then
-    echo "✓ Clave SSH generada en ~/.ssh/id_ed25519"
+
+# Contar claves generadas
+keys_count=0
+[ -f "${HOME}/.ssh/${key_server_name:-id_ed25519_server}" ] && ((keys_count++))
+[ -f "${HOME}/.ssh/${key_github_name:-id_ed25519_github}" ] && ((keys_count++))
+[ -f "${HOME}/.ssh/${key_other_name:-id_ed25519_other}" ] && ((keys_count++))
+
+if [ "$keys_count" -gt 0 ]; then
+    echo "✓ $keys_count clave(s) SSH generadas"
 fi
+
 echo ""
 echo "📝 Próximos pasos:"
 echo ""
-echo "1. Edita ~/.ssh/config para actualizar los hosts y direcciones IP"
-echo "2. Copia tu clave pública a los servidores remotos:"
-echo "   ssh-copy-id -i ~/.ssh/id_ed25519.pub usuario@servidor"
+echo "1. Configurar hosts en ~/.ssh/config con las IPs de tus servidores"
 echo ""
-echo "3. Verifica la conexión SSH:"
+if [ -f "${HOME}/.ssh/${key_server_name:-id_ed25519_server}.pub" ]; then
+    echo "2. Para servidores - Copia esta clave pública a tus servidores:"
+    echo "   ssh-copy-id -i ~/.ssh/${key_server_name:-id_ed25519_server}.pub usuario@servidor"
+    echo ""
+fi
+
+if [ -f "${HOME}/.ssh/${key_github_name:-id_ed25519_github}.pub" ]; then
+    echo "3. Para GitHub - Agrega esta clave pública en:"
+    echo "   https://github.com/settings/keys"
+    echo "   (Settings > SSH and GPG keys > New SSH key)"
+    echo ""
+    echo "   O usa este comando si tienes gh CLI instalado:"
+    echo "   gh ssh-key add ~/.ssh/${key_github_name:-id_ed25519_github}.pub"
+    echo ""
+fi
+
+echo "4. Verifica la conexión SSH a un servidor:"
 echo "   ssh usuario@servidor"
 echo ""
 echo "============================================"

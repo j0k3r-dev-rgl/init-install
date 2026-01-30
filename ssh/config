@@ -10,3 +10,15 @@ Host kvm2
     User root
     IdentityFile ~/.ssh/id_ed25519
     Port 22
+
+Host github.mauricio1990
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_mauricio1990
+    IdentitiesOnly yes
+
+Host github-j0k3r
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_j0k3r
+    IdentitiesOnly yes
