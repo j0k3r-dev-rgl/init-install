@@ -52,36 +52,9 @@ chmod +x setup.sh
 
 print_success "Temas de Rofi instalados"
 
-# 4. Configurar tema por defecto (type-7 style-1)
-print_info "Configurando tema por defecto: type-7 style-1..."
-
-# Crear script launcher personalizado
-mkdir -p "$HOME/.local/bin"
-cat > "$HOME/.local/bin/rofi-launcher" << 'EOF'
-#!/usr/bin/env bash
-
-## Author : Aditya Shakya (adi1090x)
-## Github : @adi1090x
-#
-## Rofi   : Launcher (Type-7 Style-1)
-
-dir="$HOME/.config/rofi/launchers/type-7"
-theme='style-1'
-
-## Run
-rofi \
-    -show drun \
-    -theme ${dir}/${theme}.rasi
-EOF
-
-chmod +x "$HOME/.local/bin/rofi-launcher"
-
-print_success "Launcher de Rofi configurado en ~/.local/bin/rofi-launcher"
-
 # 5. Limpiar
 rm -rf "$TEMP_DIR"
 
 print_success "==== Rofi instalado y configurado correctamente ===="
 print_info "Tema por defecto: Type-7 Style-1"
-print_info "Ejecuta: rofi-launcher (o presiona Super+D en Hyprland)"
-print_info "Para cambiar temas, edita: ~/.config/rofi/launchers/type-7/"
+print_info "Ejecuta: Super + D"

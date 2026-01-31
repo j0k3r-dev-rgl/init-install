@@ -30,7 +30,7 @@ print_info "==== Instalación de Aplicaciones de Escritorio ===="
 
 # 1. Gestor de archivos y soporte USB
 print_info "Instalando Dolphin (gestor de archivos) y soporte USB..."
-pacman_install dolphin udisks2 udiskie gvfs gvfs-mtp gvfs-gphoto2 gvfs-afc
+pacman_install dolphin udisks2 udiskie gvfs gvfs-mtp gvfs-gphoto2 gvfs-afc htop btop
 
 # Habilitar udisks2 para montaje automático de USB
 print_info "Habilitando servicio udisks2..."

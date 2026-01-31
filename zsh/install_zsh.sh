@@ -96,6 +96,31 @@ if [ -f "$ZSHRC" ]; then
     if ! grep -q "alias ls='eza" "$ZSHRC"; then
         printf "\n# Alias para eza (el nuevo ls)\nalias ls='eza --icons --group-directories-first'\nalias ll='eza -lh --icons --group-directories-first'\nalias la='eza -aH --icons --group-directories-first'\n" >> "$ZSHRC"
     fi
+
+    # Configurar variables de entorno del PATH
+    if ! grep -q '# Path configuration' "$ZSHRC"; then
+        printf '\n# Path configuration\n' >> "$ZSHRC"
+        printf '# User local binaries\n' >> "$ZSHRC"
+        printf 'export PATH="$HOME/.local/bin:$PATH"\n' >> "$ZSHRC"
+        printf '\n# Bun\n' >> "$ZSHRC"
+        printf 'export BUN_INSTALL="$HOME/.bun"\n' >> "$ZSHRC"
+        printf 'export PATH="$BUN_INSTALL/bin:$PATH"\n' >> "$ZSHRC"
+        printf '\n# NVM (Node Version Manager)\n' >> "$ZSHRC"
+        printf 'export NVM_DIR="$HOME/.nvm"\n' >> "$ZSHRC"
+        printf '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"\n' >> "$ZSHRC"
+        printf '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"\n' >> "$ZSHRC"
+        printf '\n# Java (JDK)\n' >> "$ZSHRC"
+        printf 'if [ -d "/usr/lib/jvm/default" ]; then\n' >> "$ZSHRC"
+        printf '  export JAVA_HOME="/usr/lib/jvm/default"\n' >> "$ZSHRC"
+        printf '  export PATH="$JAVA_HOME/bin:$PATH"\n' >> "$ZSHRC"
+        printf 'fi\n' >> "$ZSHRC"
+        printf '\n# Maven\n' >> "$ZSHRC"
+        printf 'if [ -d "$HOME/.local/share/maven" ]; then\n' >> "$ZSHRC"
+        printf '  export M2_HOME="$HOME/.local/share/maven"\n' >> "$ZSHRC"
+        printf '  export MAVEN_HOME="$M2_HOME"\n' >> "$ZSHRC"
+        printf '  export PATH="$M2_HOME/bin:$PATH"\n' >> "$ZSHRC"
+        printf 'fi\n' >> "$ZSHRC"
+    fi
 fi
 
 # 5. Configurar Powerlevel10k para primera ejecución

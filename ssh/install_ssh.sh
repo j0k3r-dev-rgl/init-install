@@ -302,37 +302,6 @@ if [ -t 0 ] && [ -t 1 ]; then
     esac
 fi
 
-# 6. Configuración de SSH Agent (opcional)
-if [ -t 0 ] && [ -t 1 ]; then
-    echo ""
-    echo "============================================"
-    print_section "Configuración de SSH Agent"
-    echo "============================================"
-    echo ""
-    echo -n "¿Deseas configurar SSH Agent para no ingresar la contraseña constantemente? (s/n, por defecto: s): "
-    read -r setup_agent
-    
-    case "$setup_agent" in
-        [nN]|[nN][oO])
-            print_info "Configuración de SSH Agent omitida"
-            ;;
-        *)
-            echo ""
-            echo "Agrega esto a tu ~/.zshrc o ~/.bashrc para usar SSH Agent automáticamente:"
-            echo ""
-            echo "# SSH Agent - Auto_start"
-            if [ -z "${SSH_AUTH_SOCK:-}" ]; then
-               eval "$(ssh-agent -s)" > /dev/null
-            fi
-            echo ""
-            echo "Para agregar tus claves al agent:"
-            echo "  ssh-add ~/.ssh/id_ed25519_server"
-            echo "  ssh-add ~/.ssh/id_ed25519_github"
-            echo "  ssh-add ~/.ssh/id_ed25519_other"
-            ;;
-    esac
-fi
-
 echo ""
 echo "============================================"
 print_success "Configuración de SSH completada!"
@@ -348,9 +317,9 @@ fi
 
 # Contar claves generadas
 keys_count=0
-[ -f "${HOME}/.ssh/${key_server_name:-id_ed25519_server}" ] && ((keys_count++))
-[ -f "${HOME}/.ssh/${key_github_name:-id_ed25519_github}" ] && ((keys_count++))
-[ -f "${HOME}/.ssh/${key_other_name:-id_ed25519_other}" ] && ((keys_count++))
+[ -f "${HOME}/.ssh/${key_server_name:-id_ed25519_server}" ] && keys_count=$((keys_count + 1))
+[ -f "${HOME}/.ssh/${key_github_name:-id_ed25519_github}" ] && keys_count=$((keys_count + 1))
+[ -f "${HOME}/.ssh/${key_other_name:-id_ed25519_other}" ] && keys_count=$((keys_count + 1))
 
 if [ "$keys_count" -gt 0 ]; then
     echo "✓ $keys_count clave(s) SSH generadas"

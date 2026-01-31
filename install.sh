@@ -295,7 +295,26 @@ if [ -t 0 ] && [ -t 1 ]; then
     esac
 fi
 
-# 11.3. Instalación de DevTools
+# 11.3. Instalación de Bun
+if [ -t 0 ] && [ -t 1 ]; then
+    echo -n "¿Deseas instalar Bun (JavaScript runtime) ahora? (s/n, por defecto: n): "
+    read -r install_bun
+    case "$install_bun" in
+        [sS]|[sS][iI])
+            BUN_INSTALLER="$SCRIPT_DIR/bun/install_bun.sh"
+            if [ -f "$BUN_INSTALLER" ]; then
+                chmod +x "$BUN_INSTALLER" 2>/dev/null || true
+                bash "$BUN_INSTALLER"
+            else
+                echo -e "${RED}No se encontró el instalador de Bun en $BUN_INSTALLER${NC}"
+            fi
+            ;;
+        *)
+            ;;
+    esac
+fi
+
+# 11.4. Instalación de DevTools
 if [ -t 0 ] && [ -t 1 ]; then
     echo -n "¿Deseas instalar DevTools (NVM + JDK25 + Maven) ahora? (s/n, por defecto: n): "
     read -r install_devtools
@@ -320,7 +339,7 @@ if [ -t 0 ] && [ -t 1 ]; then
     esac
 fi
 
-# 11.4. Instalación de Docker
+# 11.5. Instalación de Docker
 if [ -t 0 ] && [ -t 1 ]; then
     echo -n "¿Deseas instalar Docker + Docker Compose ahora? (s/n, por defecto: n): "
     read -r install_docker
@@ -339,7 +358,7 @@ if [ -t 0 ] && [ -t 1 ]; then
     esac
 fi
 
-# 11.5. Instalación y configuración de SSH
+# 11.6. Instalación y configuración de SSH
 if [ -t 0 ] && [ -t 1 ]; then
     echo -n "¿Deseas instalar y configurar SSH ahora? (s/n, por defecto: s): "
     read -r install_ssh
@@ -386,12 +405,11 @@ fi
 # FINALIZACIÓN
 # ==============================================================================
 echo -e "\n${GREEN}╔════════════════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║          ¡Instalación completada exitosamente!        ║${NC}"
-echo -e "${GREEN}╚════════════════════════════════════════════════════════╝${NC}"
+echo -e   "${GREEN}║          ¡Instalación completada exitosamente!         ║${NC}"
+echo -e   "${GREEN}╚════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${GREEN}PRÓXIMOS PASOS:${NC}"
-echo "  1. Cierra esta terminal"
-echo "  2. Abre una nueva terminal o reinicia tu sesión"
+echo "  1. Cierra la sesió actual y abre una nueva"
 echo "  3. ZSH se cargará automáticamente como tu shell por defecto"
 echo "  4. Powerlevel10k se configurará en la primera ejecución"
 echo ""
