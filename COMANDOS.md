@@ -227,6 +227,13 @@ mvn package                           # Empaquetar aplicación
 mvn test                              # Ejecutar tests
 ```
 
+### MongoDB Compass
+```bash
+mongodb-compass-update                # Actualizar MongoDB Compass
+/opt/mongodb-compass/MongoDB\ Compass # Ejecutar manualmente
+# También disponible en Rofi como "MongoDB Compass"
+```
+
 ---
 
 ## 📦 Gestión de Paquetes

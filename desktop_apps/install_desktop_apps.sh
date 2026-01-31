@@ -28,6 +28,10 @@ pacman_install() {
 
 print_info "==== Instalación de Aplicaciones de Escritorio ===="
 
+# 0. Dependencias necesarias
+print_info "Instalando dependencias necesarias (jq, wget)..."
+pacman_install jq wget
+
 # 1. Gestor de archivos y soporte USB
 print_info "Instalando Dolphin (gestor de archivos) y soporte USB..."
 pacman_install dolphin udisks2 udiskie gvfs gvfs-mtp gvfs-gphoto2 gvfs-afc htop btop
@@ -49,5 +53,38 @@ print_info "Instalando imv (visor de imágenes)..."
 pacman_install imv
 
 print_success "imv instalado"
+
+# 4. MongoDB Compass (opcional)
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+COMPASS_INSTALLER="$SCRIPT_DIR/install_mongodb_compass.sh"
+
+if [ -t 0 ] && [ -t 1 ]; then
+    echo ""
+    echo -n "¿Deseas instalar MongoDB Compass (GUI para MongoDB)? (s/n, por defecto: n): "
+    read -r install_compass
+    case "$install_compass" in
+        [sS]|[sS][iI])
+            if [ -f "$COMPASS_INSTALLER" ]; then
+                print_info "Instalando MongoDB Compass..."
+                bash "$COMPASS_INSTALLER"
+                
+                # Configurar comando global
+                COMPASS_SETUP="$SCRIPT_DIR/setup_compass_command.sh"
+                if [ -f "$COMPASS_SETUP" ]; then
+                    bash "$COMPASS_SETUP"
+                fi
+                
+                print_success "MongoDB Compass instalado"
+            else
+                print_info "Instalador de MongoDB Compass no encontrado, saltando..."
+            fi
+            ;;
+        *)
+            print_info "Saltando instalación de MongoDB Compass"
+            ;;
+    esac
+else
+    print_info "Modo no interactivo: Saltando MongoDB Compass"
+fi
 
 print_success "==== Aplicaciones de escritorio instaladas correctamente ===="

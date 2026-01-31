@@ -55,7 +55,7 @@ echo ""
 
 # 1. Instalación de OpenSSH
 print_info "Instalando OpenSSH..."
-pacman_install openssh
+pacman_install openssh nano
 
 # 2. Habilitar y arrancar el servicio SSH
 print_info "Habilitando servicio SSH..."
