@@ -32,6 +32,7 @@ Este repositorio contiene un conjunto de scripts **modulares y organizados** par
 - **Dolphin** - Gestor de archivos con soporte USB completo
 - **mpv** - Reproductor de video y audio (optimizado para Wayland)
 - **imv** - Visor de imágenes nativo para Wayland
+- **MongoDB Compass** - GUI para MongoDB (opcional)
 - **Fuentes**: JetBrains Mono Nerd, Font Awesome, Noto Emoji
 
 #### 🔌 Soporte de Dispositivos
@@ -65,10 +66,12 @@ Este repositorio contiene un conjunto de scripts **modulares y organizados** par
 - **JDK 25** - Java Development Kit
 - **Maven** - Gestor de dependencias Java
 - **Docker + Docker Compose** - Contenedores
+- **MongoDB Compass** - Cliente GUI para MongoDB con auto-actualización
 
 #### 🌐 Red y Seguridad
 - **Cloudflare WARP** - VPN y DNS seguro
 - **SSH** - Configuración de servidor SSH
+- **GNOME Keyring** - Sistema de llavero de contraseñas (Secret Service API)
 
 #### 📦 Aplicaciones AUR
 - **Google Chrome** - Navegador web
@@ -107,8 +110,11 @@ instalacion-inicial/
 │   └── install_rofi.sh           # Rofi + temas adi1090x
 │
 ├── desktop_apps/                 # Aplicaciones de escritorio
-│   ├── install_desktop_apps.sh   # Dolphin, mpv, imv, zathura + USB
-│   └── configure_mime.sh         # Asociaciones de archivos
+│   ├── install_desktop_apps.sh   # Dolphin, mpv, imv + USB
+│   ├── configure_mime.sh         # Asociaciones de archivos
+│   ├── install_mongodb_compass.sh # MongoDB Compass (GUI)
+│   ├── update_mongodb_compass.sh  # Actualización automática
+│   └── setup_compass_command.sh   # Comando global mongodb-compass-update
 │
 ├── bun/                          # Bun (JavaScript runtime)
 │   └── install_bun.sh            # Instalación de Bun
@@ -120,6 +126,11 @@ instalacion-inicial/
 │   └── install_docker.sh         # Docker + Docker Compose
 │
 ├── hypr/                         # Configuraciones de Hyprland
+│
+├── keyring/                      # Llavero de contraseñas
+│   ├── install_keyring.sh        # GNOME Keyring
+│   ├── configure_keyring.sh      # PAM y autostart
+│   └── verify_keyring.sh         # Verificación del sistema
 │
 ├── kitty/                        # Terminal Kitty
 │   └── install_kitty.sh          # Configuración y temas
@@ -186,12 +197,14 @@ El script principal sigue este orden **optimizado** para evitar problemas:
 4. **Yay (AUR Helper)** - Para paquetes de AUR
 5. **Paquetes AUR** - Chrome, OnlyOffice, WARP
 6. **Fuentes** - Nerd Fonts e iconos
-7. **Entorno gráfico** - Hyprland, Dolphin, mpv, imv, Rofi
+6.5. **Llavero de contraseñas** - GNOME Keyring (Secret Service API)
+7. **Entorno gráfico** - Hyprland, Dolphin, mpv, imv, Rofi, MongoDB Compass
 8. **ZSH** - Shell + Oh My Zsh + Powerlevel10k + cambio de shell
 9. **Configuración** - Hyprland, asociaciones MIME
 10. **Cloudflare WARP** - VPN y configuración
 11. **Instaladores opcionales** - Kitty, Bun, DevTools, Neovim, Docker, SSH
 12. **Herramientas adicionales** - opencode.ai
+13. **Finalización** - Documentación y guías
 
 > ⚠️ **Importante:** ZSH se configura ANTES de instalar Neovim y otras herramientas para garantizar que el shell esté correctamente configurado. Neovim se instala DESPUÉS de DevTools para asegurar que el soporte de Java y Lombok funcione correctamente.
 
@@ -228,8 +241,23 @@ El script principal sigue este orden **optimizado** para evitar problemas:
 
 #### 📚 Guía de Comandos Rápida
 - Después de la instalación, escribe `h` en la terminal para ver una guía completa de todos los comandos útiles
-- La guía incluye comandos para: WARP, Docker, NVM, Bun, Maven, Hyprland, y más
+- La guía incluye comandos para: WARP, Docker, NVM, Bun, Maven, Hyprland, GNOME Keyring, y más
 - Archivo ubicado en: `~/COMANDOS.md`
+
+#### 🔐 Llavero de Contraseñas (GNOME Keyring)
+- Sistema estándar de Linux para almacenar contraseñas de forma segura
+- Se desbloquea automáticamente con tu contraseña de usuario
+- Compatible con navegadores, Git, SSH, Docker y más
+- Interfaz gráfica: `seahorse`
+- Comando CLI: `secret-tool`
+- SSH agent integrado: `gcr-ssh-agent`
+
+#### 🗄️ MongoDB Compass
+- Cliente GUI para MongoDB con auto-actualización
+- Descarga automática de la última versión desde GitHub
+- Comando de actualización: `mongodb-compass-update`
+- Instalación en `/opt/mongo/mongoDBCompass`
+- Accesible desde Rofi o línea de comandos
 
 #### 📁 Asociaciones de Archivos
 - Los archivos se abren automáticamente con la aplicación correcta:
@@ -297,6 +325,7 @@ This repository contains a set of **modular and organized scripts** to automate 
 - **Dolphin** - File manager with full USB support
 - **mpv** - Video and audio player (Wayland optimized)
 - **imv** - Native Wayland image viewer
+- **MongoDB Compass** - MongoDB GUI client (optional)
 - **Fonts**: JetBrains Mono Nerd, Font Awesome, Noto Emoji
 
 #### 🔌 Device Support
@@ -330,10 +359,12 @@ This repository contains a set of **modular and organized scripts** to automate 
 - **JDK 25** - Java Development Kit
 - **Maven** - Java dependency manager
 - **Docker + Docker Compose** - Containers
+- **MongoDB Compass** - MongoDB GUI client with auto-update
 
 #### 🌐 Network and Security
 - **Cloudflare WARP** - VPN and secure DNS
 - **SSH** - SSH server configuration
+- **GNOME Keyring** - Password keyring system (Secret Service API)
 
 #### 📦 AUR Applications
 - **Google Chrome** - Web browser
@@ -384,12 +415,14 @@ The main script follows this **optimized** order to avoid issues:
 4. **Yay (AUR Helper)** - For AUR packages
 5. **AUR packages** - Chrome, OnlyOffice, WARP
 6. **Fonts** - Nerd Fonts and icons
-7. **Graphical environment** - Hyprland, Dolphin, mpv, imv, Rofi
+6.5. **Password keyring** - GNOME Keyring (Secret Service API)
+7. **Graphical environment** - Hyprland, Dolphin, mpv, imv, Rofi, MongoDB Compass
 8. **ZSH** - Shell + Oh My Zsh + Powerlevel10k + shell change
 9. **Configuration** - Hyprland, MIME associations
 10. **Cloudflare WARP** - VPN and configuration
 11. **Optional installers** - Kitty, Bun, DevTools, Neovim, Docker, SSH
 12. **Additional tools** - opencode.ai
+13. **Finalization** - Documentation and guides
 
 > ⚠️ **Important:** ZSH is configured BEFORE installing Neovim and other tools to ensure the shell is properly set up. Neovim is installed AFTER DevTools to ensure Java and Lombok support works correctly.
 
