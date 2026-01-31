@@ -430,6 +430,16 @@ fi
 # ==============================================================================
 echo -e "\n${GREEN}[PASO 13/13] Finalizando instalación...${NC}"
 
+# Instalar comando de actualización del sistema
+UPDATE_CMD_INSTALLER="$SCRIPT_DIR/system_update/install_update_command.sh"
+if [ -f "$UPDATE_CMD_INSTALLER" ]; then
+    print_info "Instalando comando global 'update'..."
+    chmod +x "$UPDATE_CMD_INSTALLER" 2>/dev/null || true
+    bash "$UPDATE_CMD_INSTALLER"
+else
+    print_info "Instalador del comando 'update' no encontrado, saltando..."
+fi
+
 # Copiar archivo de ayuda al directorio home
 if [ -f "$SCRIPT_DIR/COMANDOS.md" ]; then
     print_info "Copiando guía de comandos al directorio home..."

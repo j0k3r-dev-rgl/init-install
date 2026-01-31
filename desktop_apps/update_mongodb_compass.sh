@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script de actualización de MongoDB Compass
-# Detecta la versión actual e instala la última si hay una más reciente
+# Autocontenido - descarga e instala directamente sin depender del instalador
 
 set -euo pipefail
 
@@ -32,12 +32,13 @@ die() {
     exit 1
 }
 
+INSTALL_DIR="/opt/mongo/mongoDBCompass"
 VERSION_FILE="/opt/mongo/mongoDBCompass/.version"
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-INSTALLER="$SCRIPT_DIR/install_mongodb_compass.sh"
+DESKTOP_FILE="$HOME/.local/share/applications/mongodb-compass.desktop"
 
 # Verificar dependencias
 command -v jq >/dev/null 2>&1 || die "jq no está instalado. Instala con: sudo pacman -S jq"
+command -v wget >/dev/null 2>&1 || die "wget no está instalado. Instala con: sudo pacman -S wget"
 
 print_info "Verificando versión instalada de MongoDB Compass..."
 
@@ -98,15 +99,86 @@ if [ -t 0 ] && [ -t 1 ]; then
     fi
 fi
 
-# Ejecutar instalador
+# Iniciar instalación/actualización
 print_info "Iniciando instalación/actualización..."
 echo ""
 
-if [ -f "$INSTALLER" ]; then
-    bash "$INSTALLER"
-else
-    die "No se encontró el instalador en: $INSTALLER"
+# Obtener URL de descarga
+print_info "Buscando URL de descarga..."
+URL=$(curl -sL https://api.github.com/repos/mongodb-js/compass/releases/latest | \
+    jq -r '.assets[].browser_download_url' | \
+    grep -E 'mongodb-compass-[0-9]+\.[0-9]+\.[0-9]+-linux-x64\.tar\.gz$' | \
+    grep -v 'isolated' | grep -v 'readonly' | head -n1)
+
+if [ -z "$URL" ]; then
+    die "No se pudo obtener la URL de descarga"
+fi
+
+# Crear directorio temporal
+TEMP_DIR=$(mktemp -d)
+trap "rm -rf $TEMP_DIR" EXIT
+
+print_info "Descargando MongoDB Compass v$LATEST_VERSION..."
+print_info "URL: $URL"
+
+cd "$TEMP_DIR"
+wget -q --show-progress -O compass.tar.gz "$URL" || die "Error al descargar MongoDB Compass"
+
+print_info "Extrayendo archivo..."
+tar -xzf compass.tar.gz || die "Error al extraer el archivo"
+
+# Encontrar el directorio extraído
+EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name "*Compass*" | head -n 1)
+if [ -z "$EXTRACTED_DIR" ]; then
+    die "No se encontró el directorio extraído"
+fi
+
+# Eliminar instalación anterior si existe
+if [ -d "$INSTALL_DIR" ]; then
+    print_info "Eliminando versión anterior..."
+    sudo rm -rf "$INSTALL_DIR"
+fi
+
+# Crear directorio padre
+sudo mkdir -p "/opt/mongo"
+
+# Mover a /opt/mongo/mongoDBCompass
+sudo mv "$EXTRACTED_DIR" "$INSTALL_DIR" || die "Error al mover archivos a /opt"
+
+# Guardar versión instalada
+echo "$LATEST_VERSION" | sudo tee "$VERSION_FILE" > /dev/null
+
+# Crear/actualizar lanzador .desktop
+print_info "Actualizando lanzador de aplicación..."
+
+mkdir -p "$HOME/.local/share/applications"
+
+cat > "$DESKTOP_FILE" << EOF
+[Desktop Entry]
+Name=MongoDB Compass
+Comment=The GUI for MongoDB
+Exec="$INSTALL_DIR/MongoDB Compass"
+Icon=$INSTALL_DIR/resources/app/node_modules/@mongodb-js/compass/dist/main.png
+Terminal=false
+Type=Application
+Categories=Development;Database;
+Keywords=mongodb;database;compass;
+StartupWMClass=MongoDB Compass
+EOF
+
+chmod +x "$DESKTOP_FILE"
+
+# Actualizar caché de aplicaciones
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
 fi
 
 echo ""
-print_success "Actualización completada exitosamente"
+print_success "MongoDB Compass v$LATEST_VERSION instalado correctamente"
+print_info ""
+print_info "Ubicación: $INSTALL_DIR"
+print_info "Lanzador: $DESKTOP_FILE"
+print_info ""
+print_info "Para ejecutar:"
+print_info "  • Desde Rofi: Busca 'MongoDB Compass'"
+print_info "  • Desde terminal: '$INSTALL_DIR/MongoDB Compass'"

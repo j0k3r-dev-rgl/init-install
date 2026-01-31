@@ -21,8 +21,9 @@ print_info "Creando comando global '$COMMAND_NAME'..."
 # Crear directorio .local/bin si no existe
 mkdir -p "$BIN_DIR"
 
-# Crear symlink
-ln -sf "$UPDATE_SCRIPT" "$BIN_DIR/$COMMAND_NAME"
+# Copiar el script (autocontenido, no depende del directorio original)
+cp "$UPDATE_SCRIPT" "$BIN_DIR/$COMMAND_NAME"
+chmod +x "$BIN_DIR/$COMMAND_NAME"
 
 # Verificar que .local/bin está en PATH
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then

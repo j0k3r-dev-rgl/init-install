@@ -238,6 +238,12 @@ mongodb-compass-update                # Actualizar MongoDB Compass
 
 ## 📦 Gestión de Paquetes
 
+### Actualización Completa del Sistema
+```bash
+update                                # Actualizar TODO (pacman + yay + MongoDB Compass)
+                                     # Incluye limpieza opcional de paquetes huérfanos
+```
+
 ### Pacman
 ```bash
 sudo pacman -Syu                      # Actualizar sistema completo
