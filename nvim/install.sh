@@ -114,10 +114,10 @@ mkdir -p "${HOME}/.config/nvim"
 
 # Copiar toda la configuración desde el directorio del script
 if [ -d "$SCRIPT_DIR" ]; then
-    # Excluir install.sh al copiar
+    # Excluir install.sh y lombok.jar al copiar
     for item in "$SCRIPT_DIR"/*; do
         item_name="$(basename "$item")"
-        if [ "$item_name" != "install.sh" ]; then
+        if [ "$item_name" != "install.sh" ] && [ "$item_name" != "lombok.jar" ]; then
             if [ -e "${HOME}/.config/nvim/$item_name" ]; then
                 print_info "Ya existe ${HOME}/.config/nvim/$item_name, sobreescribiendo..."
                 rm -rf "${HOME}/.config/nvim/$item_name"
@@ -128,6 +128,20 @@ if [ -d "$SCRIPT_DIR" ]; then
     done
 else
     die "No se encontró el directorio de configuración: $SCRIPT_DIR"
+fi
+
+echo ""
+print_info "Instalando Lombok para Java..."
+
+# Crear directorio para lombok si no existe
+sudo mkdir -p /usr/share/java/lombok
+
+# Copiar lombok.jar
+if [ -f "$SCRIPT_DIR/lombok.jar" ]; then
+    sudo cp "$SCRIPT_DIR/lombok.jar" /usr/share/java/lombok/lombok.jar
+    print_success "Lombok instalado en /usr/share/java/lombok/lombok.jar"
+else
+    print_info "Advertencia: No se encontró lombok.jar en $SCRIPT_DIR, saltando..."
 fi
 
 echo ""

@@ -27,7 +27,7 @@ if launcher_jar == "" then
   return
 end
 
-local lombok_path = jdtls_path .. "/lombok.jar"
+local lombok_path = "/usr/share/java/lombok/lombok.jar"
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 local workspace_dir = vim.fn.stdpath("data") .. "/jdtls-workspace/" .. project_name
 
@@ -83,7 +83,13 @@ local config = {
       },
       configuration = {
         updateBuildConfiguration = "interactive",
-        runtimes = {},
+        runtimes = {
+          {
+            name = "JavaSE-25",
+            path = "/usr/lib/jvm/java-25-openjdk/",
+            default = true,
+          },
+        },
       },
       maven = {
         downloadSources = true,

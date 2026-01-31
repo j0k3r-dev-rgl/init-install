@@ -220,6 +220,11 @@ keymap.set('n', '<leader>aa', function()
     require("core.opencode-panel").toggle()
 end, { desc = "Abrir/cerrar OpenCode" })
 
+-- Leader + a + g → Abrir/cerrar panel de gemini
+keymap.set('n', '<leader>ag', function()
+    require("core.gemini-panel").toggle()
+end, { desc = "Abrir/cerrar Gemini" })
+
 -- Leader + a + c → Consultar sobre lo seleccionado
 keymap.set('v', '<leader>ac', function()
     require("core.opencode-panel").ask_about_selection()
@@ -405,7 +410,7 @@ end, { desc = "Mostrar guía de atajos de teclado" })
 --
 -- PREFIJOS:
 -- <leader>g*  → Git (gg: lazygit, ga: add, gc: commit, gC: add+commit+push, gp: pull, gP: push, gb: nueva rama, go: checkout, gs: status, gr: restore)
--- <leader>a*  → OpenCode (aa: abrir/cerrar, ac: consultar selección, as: consultar buffer)
+-- <leader>a*  → OpenCode/Gemini (aa: abrir/cerrar OpenCode, ag: abrir/cerrar Gemini, ac: consultar selección, as: consultar buffer)
 -- <leader>f*  → Telescope (búsqueda de archivos y texto)
 -- <leader>x*  → Trouble (errores y diagnósticos)
 -- <leader>j*  → Java refactoring

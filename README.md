@@ -59,6 +59,7 @@ Este repositorio contiene un conjunto de scripts **modulares y organizados** par
 
 #### 💻 Desarrollo
 - **Neovim** - Editor de texto avanzado con configuraciones personalizadas
+- **Lombok** - Biblioteca Java para reducir código boilerplate (incluida con Neovim)
 - **Bun** - JavaScript runtime ultrarrápido y toolkit all-in-one
 - **NVM** - Node Version Manager
 - **JDK 25** - Java Development Kit
@@ -124,7 +125,8 @@ instalacion-inicial/
 │   └── install_kitty.sh          # Configuración y temas
 │
 ├── nvim/                         # Neovim
-│   └── install.sh                # Neovim + configuraciones personalizadas
+│   ├── install.sh                # Neovim + configuraciones personalizadas
+│   └── lombok.jar                # Lombok para Java (copiado a /usr/share/java/lombok/)
 │
 └── ssh/                          # SSH
     └── install_ssh.sh            # Servidor SSH
@@ -188,10 +190,10 @@ El script principal sigue este orden **optimizado** para evitar problemas:
 8. **ZSH** - Shell + Oh My Zsh + Powerlevel10k + cambio de shell
 9. **Configuración** - Hyprland, asociaciones MIME
 10. **Cloudflare WARP** - VPN y configuración
-11. **Instaladores opcionales** - Kitty, Neovim, Bun, DevTools, Docker, SSH
+11. **Instaladores opcionales** - Kitty, Bun, DevTools, Neovim, Docker, SSH
 12. **Herramientas adicionales** - opencode.ai
 
-> ⚠️ **Importante:** ZSH se configura ANTES de instalar Neovim y otras herramientas para garantizar que el shell esté correctamente configurado.
+> ⚠️ **Importante:** ZSH se configura ANTES de instalar Neovim y otras herramientas para garantizar que el shell esté correctamente configurado. Neovim se instala DESPUÉS de DevTools para asegurar que el soporte de Java y Lombok funcione correctamente.
 
 ### Notas Importantes
 
@@ -215,6 +217,8 @@ El script principal sigue este orden **optimizado** para evitar problemas:
 #### 🔧 Neovim
 - El script instala Neovim con configuraciones personalizadas
 - Asegúrate de que ZSH ya esté configurado antes de instalar Neovim
+- **Lombok para Java:** Se instala automáticamente en `/usr/share/java/lombok/lombok.jar` para soporte de desarrollo Java con anotaciones
+- Neovim se instala después de DevTools para garantizar compatibilidad con JDK y Maven
 
 #### 🌐 Cloudflare WARP
 - Durante la instalación se pregunta si deseas habilitarlo inmediatamente
@@ -320,6 +324,7 @@ This repository contains a set of **modular and organized scripts** to automate 
 
 #### 💻 Development
 - **Neovim** - Advanced text editor with custom configurations
+- **Lombok** - Java library to reduce boilerplate code (included with Neovim)
 - **Bun** - Ultra-fast JavaScript runtime and all-in-one toolkit
 - **NVM** - Node Version Manager
 - **JDK 25** - Java Development Kit
@@ -383,10 +388,10 @@ The main script follows this **optimized** order to avoid issues:
 8. **ZSH** - Shell + Oh My Zsh + Powerlevel10k + shell change
 9. **Configuration** - Hyprland, MIME associations
 10. **Cloudflare WARP** - VPN and configuration
-11. **Optional installers** - Kitty, Neovim, Bun, DevTools, Docker, SSH
+11. **Optional installers** - Kitty, Bun, DevTools, Neovim, Docker, SSH
 12. **Additional tools** - opencode.ai
 
-> ⚠️ **Important:** ZSH is configured BEFORE installing Neovim and other tools to ensure the shell is properly set up.
+> ⚠️ **Important:** ZSH is configured BEFORE installing Neovim and other tools to ensure the shell is properly set up. Neovim is installed AFTER DevTools to ensure Java and Lombok support works correctly.
 
 ### Important Notes
 
@@ -406,6 +411,12 @@ The main script follows this **optimized** order to avoid issues:
 #### 🐳 Docker without sudo
 - To use Docker without `sudo`, you must log out after installation
 - The script adds your user to the `docker` group automatically
+
+#### 🔧 Neovim
+- The script installs Neovim with custom configurations
+- Make sure ZSH is already configured before installing Neovim
+- **Lombok for Java:** Automatically installed at `/usr/share/java/lombok/lombok.jar` for Java development with annotations support
+- Neovim is installed after DevTools to ensure compatibility with JDK and Maven
 
 ### Requirements
 

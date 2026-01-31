@@ -270,30 +270,6 @@ if [ -t 0 ] && [ -t 1 ]; then
     fi
 fi
 
-# 11.2. Instalación de Neovim
-if [ -t 0 ] && [ -t 1 ]; then
-    echo -n "¿Deseas instalar Neovim ahora? (s/n, por defecto: n): "
-    read -r install_nvim
-    case "$install_nvim" in
-        [sS]|[sS][iI])
-            NVIM_INSTALLER="$SCRIPT_DIR/nvim/install.sh"
-            if [ -f "$NVIM_INSTALLER" ]; then
-                chmod +x "$NVIM_INSTALLER" 2>/dev/null || true
-                # Ejecutar en zsh si está disponible y es el shell por defecto
-                ZSH_BIN="$(command -v zsh 2>/dev/null || true)"
-                if [ -n "$ZSH_BIN" ] && [ "${SHELL:-}" = "$ZSH_BIN" ]; then
-                    zsh "$NVIM_INSTALLER"
-                else
-                    bash "$NVIM_INSTALLER"
-                fi
-            else
-                echo -e "${RED}No se encontró el instalador de Neovim en $NVIM_INSTALLER${NC}"
-            fi
-            ;;
-        *)
-            ;;
-    esac
-fi
 
 # 11.3. Instalación de Bun
 if [ -t 0 ] && [ -t 1 ]; then
@@ -339,7 +315,32 @@ if [ -t 0 ] && [ -t 1 ]; then
     esac
 fi
 
-# 11.5. Instalación de Docker
+# 11.5. Instalación de Neovim (después de DevTools para soporte de Java/Lombok)
+if [ -t 0 ] && [ -t 1 ]; then
+    echo -n "¿Deseas instalar Neovim ahora? (s/n, por defecto: n): "
+    read -r install_nvim
+    case "$install_nvim" in
+        [sS]|[sS][iI])
+            NVIM_INSTALLER="$SCRIPT_DIR/nvim/install.sh"
+            if [ -f "$NVIM_INSTALLER" ]; then
+                chmod +x "$NVIM_INSTALLER" 2>/dev/null || true
+                # Ejecutar en zsh si está disponible y es el shell por defecto
+                ZSH_BIN="$(command -v zsh 2>/dev/null || true)"
+                if [ -n "$ZSH_BIN" ] && [ "${SHELL:-}" = "$ZSH_BIN" ]; then
+                    zsh "$NVIM_INSTALLER"
+                else
+                    bash "$NVIM_INSTALLER"
+                fi
+            else
+                echo -e "${RED}No se encontró el instalador de Neovim en $NVIM_INSTALLER${NC}"
+            fi
+            ;;
+        *)
+            ;;
+    esac
+fi
+
+# 11.6. Instalación de Docker
 if [ -t 0 ] && [ -t 1 ]; then
     echo -n "¿Deseas instalar Docker + Docker Compose ahora? (s/n, por defecto: n): "
     read -r install_docker
@@ -358,7 +359,7 @@ if [ -t 0 ] && [ -t 1 ]; then
     esac
 fi
 
-# 11.6. Instalación y configuración de SSH
+# 11.7. Instalación y configuración de SSH
 if [ -t 0 ] && [ -t 1 ]; then
     echo -n "¿Deseas instalar y configurar SSH ahora? (s/n, por defecto: s): "
     read -r install_ssh

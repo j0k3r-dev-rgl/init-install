@@ -28,6 +28,11 @@ return {
                         leave_dirs_open = false,
                     },
                     hijack_netrw_behavior = "open_current",
+                    filtered_items = {
+                        hide_dotfiles = false,
+                        hide_gitignored = false,
+                        hide_hidden = false,
+                    },
                 },
                 event_handlers = {
                     {

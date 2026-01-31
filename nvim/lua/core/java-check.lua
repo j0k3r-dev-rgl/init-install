@@ -40,7 +40,7 @@ function M.check_jdtls_installation()
       end
     end
     
-    local lombok_jar = jdtls_path .. "/lombok.jar"
+    local lombok_jar = "/usr/share/java/lombok/lombok.jar"
     if vim.fn.filereadable(lombok_jar) == 0 then
       table.insert(issues, "⚠️  Lombok JAR not found: " .. lombok_jar)
       table.insert(issues, "   Lombok support may not work")
