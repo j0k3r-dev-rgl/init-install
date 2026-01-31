@@ -97,6 +97,11 @@ if [ -f "$ZSHRC" ]; then
         printf "\n# Alias para eza (el nuevo ls)\nalias ls='eza --icons --group-directories-first'\nalias ll='eza -lh --icons --group-directories-first'\nalias la='eza -aH --icons --group-directories-first'\n" >> "$ZSHRC"
     fi
 
+    # Añadir alias para mostrar ayuda rápida
+    if ! grep -q "alias h=" "$ZSHRC"; then
+        printf "\n# Alias para mostrar guía de comandos\nalias h='cat ~/COMANDOS.md | less'\n" >> "$ZSHRC"
+    fi
+
     # Configurar variables de entorno del PATH
     if ! grep -q '# Path configuration' "$ZSHRC"; then
         printf '\n# Path configuration\n' >> "$ZSHRC"

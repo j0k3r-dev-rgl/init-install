@@ -54,9 +54,12 @@ Este repositorio contiene un conjunto de scripts **modulares y organizados** par
 - **zsh-syntax-highlighting** - Resaltado de sintaxis
 - **fzf** - Fuzzy finder
 - **eza** - Reemplazo moderno de `ls` con iconos
+- **htop** - Monitor de procesos interactivo
+- **btop** - Monitor de recursos moderno y visual
 
 #### 💻 Desarrollo
 - **Neovim** - Editor de texto avanzado con configuraciones personalizadas
+- **Bun** - JavaScript runtime ultrarrápido y toolkit all-in-one
 - **NVM** - Node Version Manager
 - **JDK 25** - Java Development Kit
 - **Maven** - Gestor de dependencias Java
@@ -105,6 +108,9 @@ instalacion-inicial/
 ├── desktop_apps/                 # Aplicaciones de escritorio
 │   ├── install_desktop_apps.sh   # Dolphin, mpv, imv, zathura + USB
 │   └── configure_mime.sh         # Asociaciones de archivos
+│
+├── bun/                          # Bun (JavaScript runtime)
+│   └── install_bun.sh            # Instalación de Bun
 │
 ├── devtools/                     # Herramientas de desarrollo
 │   └── install_nvm_jdk_maven.sh  # NVM + JDK 25 + Maven
@@ -158,6 +164,9 @@ bash zsh/change_shell.sh
 bash hyprland/install_hyprland.sh
 bash hyprland/configure_hyprland.sh
 
+# Instalar solo Bun
+bash bun/install_bun.sh
+
 # Instalar solo herramientas de desarrollo
 bash devtools/install_nvm_jdk_maven.sh
 
@@ -179,7 +188,7 @@ El script principal sigue este orden **optimizado** para evitar problemas:
 8. **ZSH** - Shell + Oh My Zsh + Powerlevel10k + cambio de shell
 9. **Configuración** - Hyprland, asociaciones MIME
 10. **Cloudflare WARP** - VPN y configuración
-11. **Instaladores opcionales** - Kitty, Neovim, DevTools, Docker, SSH
+11. **Instaladores opcionales** - Kitty, Neovim, Bun, DevTools, Docker, SSH
 12. **Herramientas adicionales** - opencode.ai
 
 > ⚠️ **Importante:** ZSH se configura ANTES de instalar Neovim y otras herramientas para garantizar que el shell esté correctamente configurado.
@@ -208,8 +217,15 @@ El script principal sigue este orden **optimizado** para evitar problemas:
 - Asegúrate de que ZSH ya esté configurado antes de instalar Neovim
 
 #### 🌐 Cloudflare WARP
-- Se configura para iniciarse automáticamente con Hyprland
+- Durante la instalación se pregunta si deseas habilitarlo inmediatamente
+- Opcionalmente se configura para iniciarse automáticamente con Hyprland
 - Comando manual: `warp-cli connect` / `warp-cli disconnect`
+- Para ver estado: `warp-cli status`
+
+#### 📚 Guía de Comandos Rápida
+- Después de la instalación, escribe `h` en la terminal para ver una guía completa de todos los comandos útiles
+- La guía incluye comandos para: WARP, Docker, NVM, Bun, Maven, Hyprland, y más
+- Archivo ubicado en: `~/COMANDOS.md`
 
 #### 📁 Asociaciones de Archivos
 - Los archivos se abren automáticamente con la aplicación correcta:
@@ -299,9 +315,12 @@ This repository contains a set of **modular and organized scripts** to automate 
 - **zsh-syntax-highlighting** - Syntax highlighting
 - **fzf** - Fuzzy finder
 - **eza** - Modern `ls` replacement with icons
+- **htop** - Interactive process viewer
+- **btop** - Modern and visual resource monitor
 
 #### 💻 Development
 - **Neovim** - Advanced text editor with custom configurations
+- **Bun** - Ultra-fast JavaScript runtime and all-in-one toolkit
 - **NVM** - Node Version Manager
 - **JDK 25** - Java Development Kit
 - **Maven** - Java dependency manager
@@ -364,7 +383,7 @@ The main script follows this **optimized** order to avoid issues:
 8. **ZSH** - Shell + Oh My Zsh + Powerlevel10k + shell change
 9. **Configuration** - Hyprland, MIME associations
 10. **Cloudflare WARP** - VPN and configuration
-11. **Optional installers** - Kitty, Neovim, DevTools, Docker, SSH
+11. **Optional installers** - Kitty, Neovim, Bun, DevTools, Docker, SSH
 12. **Additional tools** - opencode.ai
 
 > ⚠️ **Important:** ZSH is configured BEFORE installing Neovim and other tools to ensure the shell is properly set up.

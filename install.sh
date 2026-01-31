@@ -404,14 +404,35 @@ fi
 # ==============================================================================
 # FINALIZACIÓN
 # ==============================================================================
+
+# Copiar archivo de ayuda al directorio home
+if [ -f "$SCRIPT_DIR/COMANDOS.md" ]; then
+    print_info "Copiando guía de comandos al directorio home..."
+    cp "$SCRIPT_DIR/COMANDOS.md" "$HOME/COMANDOS.md"
+    print_success "Guía de comandos disponible en ~/COMANDOS.md"
+fi
+
 echo -e "\n${GREEN}╔════════════════════════════════════════════════════════╗${NC}"
 echo -e   "${GREEN}║          ¡Instalación completada exitosamente!         ║${NC}"
 echo -e   "${GREEN}╚════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${GREEN}PRÓXIMOS PASOS:${NC}"
-echo "  1. Cierra la sesió actual y abre una nueva"
-echo "  3. ZSH se cargará automáticamente como tu shell por defecto"
-echo "  4. Powerlevel10k se configurará en la primera ejecución"
+echo "  1. Cierra la sesión actual y abre una nueva"
+echo "  2. ZSH se cargará automáticamente como tu shell por defecto"
+echo "  3. Powerlevel10k se configurará en la primera ejecución"
 echo ""
-echo -e "${GREEN}Para iniciar Hyprland manualmente:${NC} start-hyprland"
+echo -e "${GREEN}COMANDOS ÚTILES:${NC}"
+echo "  • Para ver la guía completa de comandos: ${GREEN}h${NC}"
+echo "  • Para iniciar Hyprland: ${GREEN}start-hyprland${NC}"
+echo ""
+echo -e "${GREEN}CLOUDFLARE WARP:${NC}"
+if command -v warp-cli >/dev/null 2>&1; then
+    if warp-cli status | grep -q "Connected"; then
+        echo "  • WARP está conectado y activo"
+    else
+        echo "  • Para conectar WARP: ${GREEN}warp-cli connect${NC}"
+        echo "  • Para desconectar WARP: ${GREEN}warp-cli disconnect${NC}"
+        echo "  • Para ver estado: ${GREEN}warp-cli status${NC}"
+    fi
+fi
 echo ""

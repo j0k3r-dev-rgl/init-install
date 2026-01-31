@@ -43,25 +43,77 @@ if command -v warp-cli >/dev/null 2>&1; then
         sleep 2
     fi
 
-    print_info "Configurando modo WARP y conectando..."
-    warp-cli mode warp
-    warp-cli connect
+    # Preguntar si desea habilitar WARP ahora o después
+    ENABLE_NOW=false
+    if [ -t 0 ] && [ -t 1 ]; then
+        echo ""
+        echo -e "${GREEN}╔════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${GREEN}║         Configuración de Cloudflare WARP              ║${NC}"
+        echo -e "${GREEN}╚════════════════════════════════════════════════════════╝${NC}"
+        echo ""
+        echo "¿Deseas habilitar y conectar WARP ahora?"
+        echo ""
+        echo "Opciones:"
+        echo "  1) Sí - Habilitar y conectar WARP ahora"
+        echo "  2) No - Configurar pero no conectar (puedes hacerlo después)"
+        echo ""
+        echo -n "Selecciona una opción (1/2, por defecto: 1): "
+        read -r warp_choice
+        case "$warp_choice" in
+            2|[nN]|[nN][oO])
+                ENABLE_NOW=false
+                print_info "WARP se configurará pero no se conectará automáticamente."
+                ;;
+            *)
+                ENABLE_NOW=true
+                ;;
+        esac
+    else
+        # En modo no interactivo, configurar pero no conectar
+        ENABLE_NOW=false
+    fi
 
+    # Configurar modo WARP
+    print_info "Configurando modo WARP..."
+    warp-cli mode warp
+
+    # Conectar si el usuario lo solicitó
+    if [ "$ENABLE_NOW" = true ]; then
+        print_info "Conectando a WARP..."
+        warp-cli connect
+        print_success "WARP conectado y activo."
+    else
+        print_info "WARP configurado pero no conectado."
+    fi
+
+    # Configurar autostart en Hyprland
     HYPR_CONF="$HOME/.config/hypr/hyprland.conf"
     mkdir -p "$(dirname "$HYPR_CONF")"
     touch "$HYPR_CONF"
 
     if ! grep -q "warp-cli connect" "$HYPR_CONF"; then
-        print_info "Agregando inicio automático a Hyprland..."
-        echo "" >> "$HYPR_CONF"
-        echo "# Cloudflare WARP Auto-Connect" >> "$HYPR_CONF"
-        echo "exec-once = warp-cli connect" >> "$HYPR_CONF"
-        print_success "Configuración de Hyprland actualizada."
+        if [ -t 0 ] && [ -t 1 ] && [ "$ENABLE_NOW" = true ]; then
+            echo ""
+            echo -n "¿Deseas que WARP se inicie automáticamente con Hyprland? (s/n, por defecto: s): "
+            read -r autostart_choice
+            case "$autostart_choice" in
+                [nN]|[nN][oO])
+                    print_info "No se agregará autostart de WARP a Hyprland."
+                    ;;
+                *)
+                    print_info "Agregando inicio automático a Hyprland..."
+                    echo "" >> "$HYPR_CONF"
+                    echo "# Cloudflare WARP Auto-Connect" >> "$HYPR_CONF"
+                    echo "exec-once = warp-cli connect" >> "$HYPR_CONF"
+                    print_success "Autostart de WARP agregado a Hyprland."
+                    ;;
+            esac
+        fi
     else
         print_info "La configuración de Hyprland ya incluye WARP."
     fi
 
-    print_success "Cloudflare WARP configurado y activo."
+    print_success "Configuración de Cloudflare WARP completada."
 else
     die "Se instaló cloudflare-warp-bin pero no se encontró warp-cli en PATH."
 fi
