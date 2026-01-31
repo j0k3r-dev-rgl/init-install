@@ -44,6 +44,72 @@ nvim ~/.config/hypr/hyprland.conf    # Editar configuración de Hyprland
 
 ---
 
+## 🔐 Llavero de Contraseñas (GNOME Keyring)
+
+### Interfaz Gráfica
+```bash
+seahorse                        # Abrir gestor de contraseñas (GUI)
+```
+
+### Gestión de Contraseñas (secret-tool)
+```bash
+# Guardar una contraseña
+secret-tool store --label='Descripción' atributo valor
+
+# Ejemplo: Guardar credencial de servidor
+secret-tool store --label='Servidor SSH' server ejemplo.com user mi_usuario
+
+# Buscar contraseñas
+secret-tool search atributo valor
+secret-tool search --all        # Listar todas las contraseñas
+
+# Recuperar una contraseña
+secret-tool lookup atributo valor
+
+# Eliminar una contraseña
+secret-tool clear atributo valor
+```
+
+### SSH Agent (gcr-ssh-agent)
+```bash
+ssh-add -l                      # Listar claves SSH cargadas
+ssh-add ~/.ssh/id_rsa           # Añadir clave SSH al agente
+ssh-add -D                      # Eliminar todas las claves del agente
+
+# Guardar passphrase SSH en el keyring
+/usr/lib/seahorse/ssh-askpass ~/.ssh/id_rsa
+
+# Ver estado del SSH agent
+echo $SSH_AUTH_SOCK
+systemctl --user status gcr-ssh-agent.socket
+```
+
+### Git con Keyring
+```bash
+# Configurar Git para usar el keyring
+git config --global credential.helper /usr/lib/git-core/git-credential-libsecret
+
+# Git guardará automáticamente las credenciales HTTPS
+```
+
+### Bloquear/Desbloquear Keyring
+```bash
+# Bloquear el keyring manualmente
+dbus-send --session --dest=org.freedesktop.secrets \
+  --type=method_call \
+  /org/freedesktop/secrets \
+  org.freedesktop.Secret.Service.Lock \
+  array:objpath:/org/freedesktop/secrets/collection/login
+```
+
+### Servicio GNOME Keyring
+```bash
+ps aux | grep gnome-keyring     # Verificar que esté corriendo
+systemctl --user status gnome-keyring-daemon.service
+```
+
+---
+
 ## 🌐 Cloudflare WARP
 
 ### Comandos de Conexión

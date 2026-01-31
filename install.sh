@@ -166,9 +166,32 @@ echo -e "\n${GREEN}[PASO 6/12] Instalando fuentes (TTF e iconos)...${NC}"
 pacman_install ttf-font-awesome ttf-jetbrains-mono-nerd noto-fonts-emoji ttf-liberation ttf-dejavu
 
 # ==============================================================================
+# PASO 6.5: INSTALACIÓN Y CONFIGURACIÓN DEL LLAVERO DE CONTRASEÑAS
+# ==============================================================================
+echo -e "\n${GREEN}[PASO 6.5/13] Configurando llavero de contraseñas (GNOME Keyring)...${NC}"
+
+# 6.5.1. Instalación de GNOME Keyring
+KEYRING_INSTALLER="$SCRIPT_DIR/keyring/install_keyring.sh"
+if [ -f "$KEYRING_INSTALLER" ]; then
+    chmod +x "$KEYRING_INSTALLER" 2>/dev/null || true
+    bash "$KEYRING_INSTALLER"
+else
+    print_info "Instalador de GNOME Keyring no encontrado, saltando..."
+fi
+
+# 6.5.2. Configuración de PAM y autostart
+KEYRING_CONFIGURATOR="$SCRIPT_DIR/keyring/configure_keyring.sh"
+if [ -f "$KEYRING_CONFIGURATOR" ]; then
+    chmod +x "$KEYRING_CONFIGURATOR" 2>/dev/null || true
+    bash "$KEYRING_CONFIGURATOR"
+else
+    print_info "Configurador de GNOME Keyring no encontrado, saltando..."
+fi
+
+# ==============================================================================
 # PASO 7: INSTALACIÓN DE ENTORNO GRÁFICO Y APLICACIONES
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 7/12] Instalando entorno gráfico y aplicaciones...${NC}"
+echo -e "\n${GREEN}[PASO 7/13] Instalando entorno gráfico y aplicaciones...${NC}"
 
 # 7.1. Hyprland
 HYPRLAND_INSTALLER="$SCRIPT_DIR/hyprland/install_hyprland.sh"
@@ -200,7 +223,7 @@ fi
 # ==============================================================================
 # PASO 8: INSTALACIÓN Y CONFIGURACIÓN DE ZSH
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 8/12] Configurando ZSH como shell por defecto...${NC}"
+echo -e "\n${GREEN}[PASO 8/13] Configurando ZSH como shell por defecto...${NC}"
 
 # 8.1. Instalación de ZSH, Oh My Zsh, plugins y Powerlevel10k
 ZSH_INSTALLER="$SCRIPT_DIR/zsh/install_zsh.sh"
@@ -223,7 +246,7 @@ fi
 # ==============================================================================
 # PASO 9: CONFIGURACIÓN DE HYPRLAND Y ASOCIACIONES MIME
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 9/12] Configurando Hyprland y asociaciones de archivos...${NC}"
+echo -e "\n${GREEN}[PASO 9/13] Configurando Hyprland y asociaciones de archivos...${NC}"
 
 # 9.1. Configuración de Hyprland
 HYPRLAND_CONFIGURATOR="$SCRIPT_DIR/hyprland/configure_hyprland.sh"
@@ -246,7 +269,7 @@ fi
 # ==============================================================================
 # PASO 10: CONFIGURACIÓN DE CLOUDFLARE WARP
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 10/12] Configurando Cloudflare WARP...${NC}"
+echo -e "\n${GREEN}[PASO 10/13] Configurando Cloudflare WARP...${NC}"
 
 WARP_CONFIGURATOR="$SCRIPT_DIR/cloudflare_warp/configure_warp.sh"
 if [ -f "$WARP_CONFIGURATOR" ]; then
@@ -259,7 +282,7 @@ fi
 # ==============================================================================
 # PASO 11: INSTALADORES OPCIONALES
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 11/12] Instaladores opcionales...${NC}"
+echo -e "\n${GREEN}[PASO 11/13] Instaladores opcionales...${NC}"
 
 # 11.1. Configuración de Kitty
 if [ -t 0 ] && [ -t 1 ]; then
@@ -381,7 +404,7 @@ fi
 # ==============================================================================
 # PASO 12: HERRAMIENTAS ADICIONALES
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 12/12] Herramientas adicionales...${NC}"
+echo -e "\n${GREEN}[PASO 12/13] Herramientas adicionales...${NC}"
 
 # 12.1. Instalación de opencode.ai
 if [ -t 0 ] && [ -t 1 ]; then
@@ -403,8 +426,9 @@ if [ -t 0 ] && [ -t 1 ]; then
 fi
 
 # ==============================================================================
-# FINALIZACIÓN
+# PASO 13: FINALIZACIÓN Y DOCUMENTACIÓN
 # ==============================================================================
+echo -e "\n${GREEN}[PASO 13/13] Finalizando instalación...${NC}"
 
 # Copiar archivo de ayuda al directorio home
 if [ -f "$SCRIPT_DIR/COMANDOS.md" ]; then
