@@ -267,20 +267,7 @@ else
 fi
 
 # ==============================================================================
-# PASO 10: CONFIGURACIÓN DE CLOUDFLARE WARP
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 10/13] Configurando Cloudflare WARP...${NC}"
-
-WARP_CONFIGURATOR="$SCRIPT_DIR/cloudflare_warp/configure_warp.sh"
-if [ -f "$WARP_CONFIGURATOR" ]; then
-    chmod +x "$WARP_CONFIGURATOR" 2>/dev/null || true
-    bash "$WARP_CONFIGURATOR"
-else
-    print_info "Configurador de Cloudflare WARP no encontrado, saltando..."
-fi
-
-# ==============================================================================
-# PASO 11: INSTALADORES OPCIONALES
+# PASO 10: INSTALADORES OPCIONALES
 # ==============================================================================
 echo -e "\n${GREEN}[PASO 11/13] Instaladores opcionales...${NC}"
 
@@ -402,7 +389,7 @@ if [ -t 0 ] && [ -t 1 ]; then
 fi
 
 # ==============================================================================
-# PASO 12: HERRAMIENTAS ADICIONALES
+# PASO 11: HERRAMIENTAS ADICIONALES
 # ==============================================================================
 echo -e "\n${GREEN}[PASO 12/13] Herramientas adicionales...${NC}"
 
@@ -426,7 +413,7 @@ if [ -t 0 ] && [ -t 1 ]; then
 fi
 
 # ==============================================================================
-# PASO 13: FINALIZACIÓN Y DOCUMENTACIÓN
+# PASO 12: FINALIZACIÓN Y DOCUMENTACIÓN
 # ==============================================================================
 echo -e "\n${GREEN}[PASO 13/13] Finalizando instalación...${NC}"
 

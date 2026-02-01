@@ -14,8 +14,29 @@ return {
                     width = 30,
                     position = "right",
                     mappings = {
-                        ["o"] = "none",
-                        ["l"] = "none",
+                        -- 1. DESACTIVAR conflictos de Neo-tree para liberar la 'o'
+                        ["oc"] = "none",
+                        ["od"] = "none",
+                        ["og"] = "none",
+                        ["om"] = "none",
+                        ["on"] = "none",
+                        ["os"] = "none",
+                        ["ot"] = "none",
+
+                        -- 2. TUS MAPEOS de navegación
+                        ["o"] = function(state)
+                            local line = vim.fn.line(".")
+                            if line > 1 then
+                                vim.api.nvim_win_set_cursor(0, { line - 1, 0 })
+                            end
+                        end,
+                        ["l"] = function(state)
+                            local line = vim.fn.line(".")
+                            local last_line = vim.api.nvim_buf_line_count(0)
+                            if line < last_line then
+                                vim.api.nvim_win_set_cursor(0, { line + 1, 0 })
+                            end
+                        end,
                         ["k"] = "close_node",
                         ["ñ"] = "open",
                         ["<space>"] = "none",

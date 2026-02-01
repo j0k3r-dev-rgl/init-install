@@ -51,12 +51,12 @@ copy_config_dir() {
 }
 
 # Copiar configuraciones de Hyprland
-HYPR_SOURCE="$SCRIPT_DIR/../hypr"
+HYPR_SOURCE="$SCRIPT_DIR/conf"
 if [ -d "$HYPR_SOURCE" ]; then
     copy_config_dir "$HYPR_SOURCE" "$HOME/.config/hypr"
     print_success "Configuración de Hyprland copiada"
 else
-    print_info "No se encontró directorio de configuración hypr/, saltando..."
+    print_info "No se encontró directorio de configuración conf/, saltando..."
 fi
 
 # Configurar inicio automático de Hyprland

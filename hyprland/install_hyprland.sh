@@ -4,6 +4,8 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
 # --- Colores para la salida ---
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -33,3 +35,11 @@ print_info "Instalando Hyprland y Kitty..."
 pacman_install hyprland kitty
 
 print_success "Hyprland y componentes instalados correctamente"
+
+# Ejecutar script de configuración
+if [ -f "$SCRIPT_DIR/configure_hyprland.sh" ]; then
+    print_info "Ejecutando configuración de Hyprland..."
+    bash "$SCRIPT_DIR/configure_hyprland.sh"
+else
+    print_info "No se encontró el script de configuración configure_hyprland.sh"
+fi

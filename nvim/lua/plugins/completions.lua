@@ -1,79 +1,60 @@
 return {
     {
-        "hrsh7th/nvim-cmp",
+        "saghen/blink.cmp",
+        version = "*", -- Usa la última versión estable (requerido para descargas de binarios pre-compilados)
         dependencies = {
-            "hrsh7th/cmp-nvim-lsp",
-            "L3MON4D3/LuaSnip",
-            "saadparwaiz1/cmp_luasnip",
+            "rafamadriz/friendly-snippets", -- Snippets estándar
+            { "saghen/blink.compat", opts = {} }, -- Capa de compatibilidad para fuentes de nvim-cmp
         },
-        config = function()
-            local cmp = require("cmp")
-            local cmp_nvim_lsp = require("cmp_nvim_lsp")
+        opts = {
+            keymap = {
+                preset = "default",
+                -- Mapeo explícito para Ctrl+Space: Mostrar menú y documentación
+                ["<C-space>"] = { "show", "show_documentation", "hide_documentation" },
+                ["<CR>"] = { "accept", "fallback" },
+                ["<Tab>"] = { "select_next", "fallback" },
+                ["<S-Tab>"] = { "select_prev", "fallback" },
+            },
 
-            local capabilities = cmp_nvim_lsp.default_capabilities()
-            capabilities.textDocument.completion.completionItem.snippetSupport = true
-            capabilities.textDocument.completion.completionItem.resolveSupport = {
-                properties = {
-                    'documentation',
-                    'detail',
-                    'additionalTextEdits',
-                }
-            }
+            appearance = {
+                use_nvim_cmp_as_default = true,
+                nerd_font_variant = "mono",
+            },
 
-            _G.lsp_capabilities = capabilities
-
-            cmp.setup({
-                snippet = {
-                    expand = function(args) require("luasnip").lsp_expand(args.body) end,
-                },
-                mapping = cmp.mapping.preset.insert({
-                    ["<C-b>"] = cmp.mapping.scroll_docs(-4),
-                    ["<C-f>"] = cmp.mapping.scroll_docs(4),
-                    ["<C-Space>"] = cmp.mapping.complete(),
-                    ["<CR>"] = cmp.mapping.confirm({
-                        select = true,
-                        behavior = cmp.ConfirmBehavior.Replace,
-                    }),
-                    ["<Tab>"] = cmp.mapping(function(fallback)
-                        if cmp.visible() then
-                            cmp.select_next_item()
-                        else
-                            fallback()
-                        end
-                    end, { "i", "s" }),
-                    ["<S-Tab>"] = cmp.mapping(function(fallback)
-                        if cmp.visible() then
-                            cmp.select_prev_item()
-                        else
-                            fallback()
-                        end
-                    end, { "i", "s" }),
-                }),
-                sources = cmp.config.sources({
-                    {
-                        name = "nvim_lsp",
-                        priority = 1000,
-                        entry_filter = function(entry, ctx)
-                            return true
-                        end,
+            sources = {
+                -- Fuentes habilitadas: LSP (imports), Codeium (IA), Snippets, Buffer, Path
+                default = { "lsp", "codeium", "snippets", "buffer", "path" },
+                providers = {
+                    -- Configuración específica para Codeium usando blink.compat
+                    codeium = {
+                        name = "codeium",
+                        module = "blink.compat.source",
+                        score_offset = 100, -- Prioridad ajustada
                     },
-                    { name = "codeium", priority = 800 },
-                    { name = "luasnip", priority = 600 },
-                }, {
-                    { name = "buffer", priority = 400 },
-                }),
-                formatting = {
-                    format = function(entry, vim_item)
-                        vim_item.menu = ({
-                            nvim_lsp = "[LSP]",
-                            luasnip = "[Snippet]",
-                            buffer = "[Buffer]",
-                            codeium = "[AI]",
-                        })[entry.source.name]
-                        return vim_item
-                    end,
                 },
-            })
-        end,
+            },
+
+            -- Configuración crítica para comportamiento de lista y documentación
+            completion = {
+                documentation = { 
+                    auto_show = true, 
+                    auto_show_delay_ms = 200 
+                },
+                list = {
+                    -- 'auto_insert' es clave para que los imports funcionen al seleccionar
+                    selection = { preselect = false, auto_insert = true }
+                },
+                menu = {
+                    draw = {
+                        columns = { { "label", "label_description", gap = 1 }, { "kind_icon", "kind" } },
+                    },
+                },
+            },
+
+            -- Habilita ayuda de firma de función (parámetros) mientras escribes
+            signature = { enabled = true },
+        },
+        -- Necesario para extender la lista de fuentes correctamente
+        opts_extend = { "sources.default" },
     },
 }

@@ -8,13 +8,12 @@ require("core.runners")
 require("config.dbee-visual").setup() -- Configuración visual para nvim-dbee
 vim.g.skip_ts_context_commentstring_module = true
 vim.opt.termguicolors = true
-
 -- Activar highlighting de treesitter automáticamente para todos los archivos
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = '*',
-  callback = function()
-    pcall(vim.treesitter.start)  -- pcall para evitar errores si no hay parser
-  end,
+    pattern = '*',
+    callback = function()
+        pcall(vim.treesitter.start) -- pcall para evitar errores si no hay parser
+    end,
 })
 
 -- Configuración de diagnósticos
