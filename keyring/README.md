@@ -39,8 +39,9 @@ session    optional     pam_gnome_keyring.so auto_start
 
 ### 2. Autostart en Hyprland
 
-Se crea `~/.config/hypr/autostart.conf` con:
+El autostart de gnome-keyring está integrado en la configuración modular de Hyprland (`hyprland/conf/autostart.conf`).
 
+Las líneas añadidas son:
 ```bash
 # Actualizar variables de entorno D-Bus
 exec-once = dbus-update-activation-environment --all
@@ -48,6 +49,8 @@ exec-once = dbus-update-activation-environment --all
 # Iniciar gnome-keyring-daemon
 exec-once = gnome-keyring-daemon --start --components=secrets
 ```
+
+Si se ejecuta `configure_keyring.sh` de forma independiente, este verificará y añadirá estas líneas a `~/.config/hypr/autostart.conf` si no están presentes.
 
 ### 3. SSH Agent (gcr-ssh-agent)
 

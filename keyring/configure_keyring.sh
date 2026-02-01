@@ -74,19 +74,17 @@ fi
 # 2. CONFIGURACIÓN DE AUTOSTART PARA HYPRLAND
 # ==============================================================================
 
-print_info "Configurando autostart de gnome-keyring para Hyprland..."
+print_info "Verificando autostart de gnome-keyring para Hyprland..."
 
 HYPR_CONFIG_DIR="$HOME/.config/hypr"
 AUTOSTART_FILE="$HYPR_CONFIG_DIR/autostart.conf"
 
-# Crear directorio si no existe
-mkdir -p "$HYPR_CONFIG_DIR"
-
-# Verificar si ya existe el autostart
+# Verificar si ya existe el autostart en el archivo del sistema
 if [ -f "$AUTOSTART_FILE" ] && grep -q "gnome-keyring-daemon" "$AUTOSTART_FILE"; then
-    print_warning "Autostart de gnome-keyring ya configurado, saltando..."
+    print_success "Autostart de gnome-keyring ya configurado en $AUTOSTART_FILE"
 else
     print_info "Añadiendo gnome-keyring-daemon al autostart de Hyprland..."
+    mkdir -p "$HYPR_CONFIG_DIR"
     
     # Crear o actualizar autostart.conf
     cat >> "$AUTOSTART_FILE" << 'EOF'
@@ -100,17 +98,8 @@ EOF
     print_success "Autostart configurado en $AUTOSTART_FILE"
 fi
 
-# Asegurarse de que hyprland.conf incluye autostart.conf
-HYPR_MAIN_CONFIG="$HYPR_CONFIG_DIR/hyprland.conf"
-if [ -f "$HYPR_MAIN_CONFIG" ]; then
-    if ! grep -q "source.*autostart.conf" "$HYPR_MAIN_CONFIG"; then
-        print_info "Añadiendo source de autostart.conf a hyprland.conf..."
-        echo "" >> "$HYPR_MAIN_CONFIG"
-        echo "# Autostart applications" >> "$HYPR_MAIN_CONFIG"
-        echo "source = ~/.config/hypr/autostart.conf" >> "$HYPR_MAIN_CONFIG"
-        print_success "hyprland.conf actualizado"
-    fi
-fi
+# NOTA: La inclusión de autostart.conf en hyprland.conf ya está gestionada
+# por la configuración base en hyprland/conf/hyprland.conf
 
 # ==============================================================================
 # 3. CONFIGURACIÓN DE SSH AGENT (GCR-SSH-AGENT)
@@ -134,6 +123,35 @@ cat > "$ENV_DIR/ssh_auth_sock.conf" << 'EOF'
 # SSH Agent Socket - gcr-ssh-agent (GNOME Keyring)
 SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/gcr/ssh
 EOF
+
+# Configurar también en .bashrc y .zshrc para asegurar disponibilidad
+print_info "Configurando variables en .bashrc y .zshrc..."
+
+export_line='export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/gcr/ssh"'
+
+# Bash
+if [ -f "$HOME/.bashrc" ]; then
+    if ! grep -q "SSH_AUTH_SOCK" "$HOME/.bashrc"; then
+        echo "" >> "$HOME/.bashrc"
+        echo "# GNOME Keyring SSH Agent" >> "$HOME/.bashrc"
+        echo "$export_line" >> "$HOME/.bashrc"
+        print_success "Añadido a .bashrc"
+    else
+        print_info "Ya configurado en .bashrc"
+    fi
+fi
+
+# Zsh
+if [ -f "$HOME/.zshrc" ]; then
+    if ! grep -q "SSH_AUTH_SOCK" "$HOME/.zshrc"; then
+        echo "" >> "$HOME/.zshrc"
+        echo "# GNOME Keyring SSH Agent" >> "$HOME/.zshrc"
+        echo "$export_line" >> "$HOME/.zshrc"
+        print_success "Añadido a .zshrc"
+    else
+        print_info "Ya configurado en .zshrc"
+    fi
+fi
 
 print_success "gcr-ssh-agent configurado"
 
