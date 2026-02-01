@@ -64,7 +64,7 @@ fi
 # ==============================================================================
 # PASO 1: ACTUALIZACIÓN DEL SISTEMA Y DEPENDENCIAS BASE
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 1/12] Actualizando sistema e instalando dependencias base...${NC}"
+echo -e "\n${GREEN}[PASO 1/13] Actualizando sistema e instalando dependencias base...${NC}"
 sudo -v
 sudo pacman -Syu --noconfirm
 pacman_install git curl base-devel grim slurp wl-clipboard pciutils
@@ -75,7 +75,7 @@ require_cmd curl
 # ==============================================================================
 # PASO 2: INSTALACIÓN DE SERVICIOS DEL SISTEMA (DRIVERS Y UTILIDADES)
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 2/12] Instalando drivers y utilidades del sistema...${NC}"
+echo -e "\n${GREEN}[PASO 2/13] Instalando drivers y utilidades del sistema...${NC}"
 
 # 2.1. NetworkManager
 NETWORK_INSTALLER="$SCRIPT_DIR/drivers_utilities/network_install.sh"
@@ -107,7 +107,7 @@ fi
 # ==============================================================================
 # PASO 3: DETECCIÓN Y CONFIGURACIÓN DE HARDWARE
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 3/12] Detectando hardware e instalando drivers...${NC}"
+echo -e "\n${GREEN}[PASO 3/13] Detectando hardware e instalando drivers...${NC}"
 
 # 3.1. Instalación de microcódigo de CPU (AMD/Intel)
 CPU_INSTALLER="$SCRIPT_DIR/drivers_utilities/cpu_microcode_install.sh"
@@ -127,10 +127,21 @@ else
     print_info "Instalador de drivers de GPU no encontrado, saltando..."
 fi
 
+# 3.3. Configuración de TRIM
+echo -e "\n${GREEN}[PASO 3/13] Configurando TRIM para SSDs...${NC}"
+
+TRIM_CONFIGURATOR="$SCRIPT_DIR/configure_trim/configure_trim.sh"
+if [ -f "$TRIM_CONFIGURATOR" ]; then
+    chmod +x "$TRIM_CONFIGURATOR" 2>/dev/null || true
+    bash "$TRIM_CONFIGURATOR"
+else
+    print_info "Configurador de TRIM no encontrado, saltando..."
+fi
+
 # ==============================================================================
 # PASO 4: INSTALACIÓN DE YAY (AUR HELPER)
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 4/12] Instalando Yay (AUR Helper)...${NC}"
+echo -e "\n${GREEN}[PASO 4/13] Instalando Yay (AUR Helper)...${NC}"
 
 if ! command -v yay &> /dev/null; then
     print_info "Instalando yay..."
@@ -149,7 +160,7 @@ fi
 # ==============================================================================
 # PASO 5: INSTALACIÓN DE PAQUETES DESDE AUR
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 5/12] Instalando paquetes desde AUR...${NC}"
+echo -e "\n${GREEN}[PASO 5/13] Instalando paquetes desde AUR...${NC}"
 
 YAY_INSTALLER="$SCRIPT_DIR/yay_install/install_yay_packages.sh"
 if [ -f "$YAY_INSTALLER" ]; then
@@ -162,13 +173,13 @@ fi
 # ==============================================================================
 # PASO 6: INSTALACIÓN DE FUENTES
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 6/12] Instalando fuentes (TTF e iconos)...${NC}"
+echo -e "\n${GREEN}[PASO 6/13] Instalando fuentes (TTF e iconos)...${NC}"
 pacman_install ttf-font-awesome ttf-jetbrains-mono-nerd noto-fonts-emoji ttf-liberation ttf-dejavu
 
 # ==============================================================================
 # PASO 6.5: INSTALACIÓN Y CONFIGURACIÓN DEL LLAVERO DE CONTRASEÑAS
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 6.5/13] Configurando llavero de contraseñas (GNOME Keyring)...${NC}"
+echo -e "\n${GREEN}[PASO 7/13] Configurando llavero de contraseñas (GNOME Keyring)...${NC}"
 
 # 6.5.1. Instalación de GNOME Keyring
 KEYRING_INSTALLER="$SCRIPT_DIR/keyring/install_keyring.sh"
@@ -191,7 +202,7 @@ fi
 # ==============================================================================
 # PASO 7: INSTALACIÓN DE ENTORNO GRÁFICO Y APLICACIONES
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 7/13] Instalando entorno gráfico y aplicaciones...${NC}"
+echo -e "\n${GREEN}[PASO 8/13] Instalando entorno gráfico y aplicaciones...${NC}"
 
 # 7.1. Hyprland
 HYPRLAND_INSTALLER="$SCRIPT_DIR/hyprland/install_hyprland.sh"
@@ -223,7 +234,7 @@ fi
 # ==============================================================================
 # PASO 8: INSTALACIÓN Y CONFIGURACIÓN DE ZSH
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 8/13] Configurando ZSH como shell por defecto...${NC}"
+echo -e "\n${GREEN}[PASO 9/13] Configurando ZSH como shell por defecto...${NC}"
 
 # 8.1. Instalación de ZSH, Oh My Zsh, plugins y Powerlevel10k
 ZSH_INSTALLER="$SCRIPT_DIR/zsh/install_zsh.sh"
@@ -246,7 +257,7 @@ fi
 # ==============================================================================
 # PASO 9: CONFIGURACIÓN DE HYPRLAND Y ASOCIACIONES MIME
 # ==============================================================================
-echo -e "\n${GREEN}[PASO 9/13] Configurando Hyprland y asociaciones de archivos...${NC}"
+echo -e "\n${GREEN}[PASO 10/13] Configurando Hyprland y asociaciones de archivos...${NC}"
 
 # 9.1. Configuración de Hyprland
 HYPRLAND_CONFIGURATOR="$SCRIPT_DIR/hyprland/configure_hyprland.sh"
