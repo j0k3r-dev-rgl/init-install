@@ -13,7 +13,7 @@ echo "Configuring fstrim.timer for daily execution and persistence..."
 mkdir -p /etc/systemd/system/fstrim.timer.d/
 
 # Create the override.conf file
-cat << EOF > /etc/systemd/system/fstrim.timer.d/override.conf
+sudo cat << EOF > /etc/systemd/system/fstrim.timer.d/override.conf
 [Timer]
 OnCalendar=
 OnCalendar=daily

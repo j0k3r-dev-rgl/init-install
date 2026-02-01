@@ -67,7 +67,7 @@ fi
 echo -e "\n${GREEN}[PASO 1/13] Actualizando sistema e instalando dependencias base...${NC}"
 sudo -v
 sudo pacman -Syu --noconfirm
-pacman_install git curl base-devel grim slurp wl-clipboard pciutils
+pacman_install git curl base-devel grim slurp wl-clipboard pciutils unzip
 
 require_cmd git
 require_cmd curl
@@ -133,7 +133,7 @@ echo -e "\n${GREEN}[PASO 3/13] Configurando TRIM para SSDs...${NC}"
 TRIM_CONFIGURATOR="$SCRIPT_DIR/configure_trim/configure_trim.sh"
 if [ -f "$TRIM_CONFIGURATOR" ]; then
     chmod +x "$TRIM_CONFIGURATOR" 2>/dev/null || true
-    bash "$TRIM_CONFIGURATOR"
+    sudo "$TRIM_CONFIGURATOR"
 else
     print_info "Configurador de TRIM no encontrado, saltando..."
 fi
@@ -417,6 +417,18 @@ if [ -t 0 ] && [ -t 1 ]; then
             else
                 print_info "Instalando opencode.ai..."
                 curl -fsSL https://opencode.ai/install | bash
+                # Aqui tengo que agregar para agregar la variable de entorno 
+                # PATH=/home/j0k3r/.opencode/bin:$PATH
+                # # Intentar agregar a .bashrc y .zshrc si existen
+                for rc_file in "$HOME/.bashrc" "$HOME/.zshrc"; do
+                    if [ -f "$rc_file" ]; then
+                        # Solo agregar si no existe ya en el archivo
+                        if ! grep -q ".opencode/bin" "$rc_file"; then
+                            echo -e "\n# Opencode.ai path\n$EXPORT_LINE" >> "$rc_file"
+                            print_info "PATH agregado a $rc_file"
+                        fi
+                    fi
+                done
                 print_success "opencode.ai instalado exitosamente"
             fi
             ;;
