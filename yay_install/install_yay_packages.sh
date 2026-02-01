@@ -48,13 +48,4 @@ else
     print_info "OnlyOffice ya está instalado, saltando..."
 fi
 
-# 3. Cloudflare WARP
-if ! pacman -Qs cloudflare-warp-bin > /dev/null 2>&1; then
-    print_info "Instalando Cloudflare WARP..."
-    yay -S --needed --noconfirm cloudflare-warp-bin
-    print_success "Cloudflare WARP instalado"
-else
-    print_info "Cloudflare WARP ya está instalado, saltando..."
-fi
-
 print_success "==== Instalación de paquetes AUR completada ===="

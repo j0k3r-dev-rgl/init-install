@@ -20,7 +20,6 @@ Este repositorio contiene un conjunto de scripts **modulares y organizados** par
 ✅ **ZSH + Oh My Zsh + Powerlevel10k configurado automáticamente**
 ✅ **Neovim con configuraciones personalizadas**
 ✅ **Herramientas de desarrollo (NVM, JDK 25, Maven, Docker)**
-✅ **Cloudflare WARP integrado**
 ✅ **Fuentes Nerd Fonts para terminal**
 
 ### Herramientas y Componentes Instalados
@@ -46,6 +45,7 @@ Este repositorio contiene un conjunto de scripts **modulares y organizados** par
 - **Códecs multimedia** - FFmpeg, GStreamer (todos los plugins)
 - **Microcódigo CPU** - AMD/Intel (detección automática)
 - **Drivers GPU** - NVIDIA/AMD/Intel (detección automática)
+- **TRIM** - Mantenimiento automático para SSDs ([Ver Documentación](configure_trim/README.md))
 
 #### 🐚 Shell y Herramientas CLI
 - **ZSH** - Shell por defecto
@@ -69,7 +69,6 @@ Este repositorio contiene un conjunto de scripts **modulares y organizados** par
 - **MongoDB Compass** - Cliente GUI para MongoDB con auto-actualización
 
 #### 🌐 Red y Seguridad
-- **Cloudflare WARP** - VPN y DNS seguro
 - **SSH** - Configuración de servidor SSH
 - **GNOME Keyring** - Sistema de llavero de contraseñas (Secret Service API)
 
@@ -84,8 +83,8 @@ Este repositorio contiene un conjunto de scripts **modulares y organizados** par
 instalacion-inicial/
 ├── install.sh                    # Script principal orquestador
 │
-├── cloudflare_warp/              # Configuración de Cloudflare WARP
-│   └── configure_warp.sh
+├── configure_trim/              # TRIM configuration for SSDs
+│   └── README.md                # Detailed documentation
 │
 ├── drivers_utilities/            # Drivers y utilidades del sistema
 │   ├── README.md                 # Documentación detallada
@@ -100,7 +99,7 @@ instalacion-inicial/
 │   └── configure_hyprland.sh     # Configuración y autostart
 │
 ├── yay_install/                  # Paquetes de AUR
-│   └── install_yay_packages.sh   # Chrome, OnlyOffice, WARP
+│   └── install_yay_packages.sh   # Chrome, OnlyOffice
 │
 ├── zsh/                          # Shell ZSH
 │   ├── install_zsh.sh            # ZSH + Oh My Zsh + Powerlevel10k
@@ -193,15 +192,14 @@ El script principal sigue este orden **optimizado** para evitar problemas:
 
 1. **Sistema base** - Actualización y dependencias
 2. **Drivers y utilidades** - NetworkManager, PipeWire, Códecs
-3. **Hardware** - Microcódigo CPU, Drivers GPU
+3. **Hardware** - Microcódigo CPU, Drivers GPU, **TRIM para SSDs**
 4. **Yay (AUR Helper)** - Para paquetes de AUR
-5. **Paquetes AUR** - Chrome, OnlyOffice, WARP
+5. **Paquetes AUR** - Chrome, OnlyOffice
 6. **Fuentes** - Nerd Fonts e iconos
-6.5. **Llavero de contraseñas** - GNOME Keyring (Secret Service API)
-7. **Entorno gráfico** - Hyprland, Dolphin, mpv, imv, Rofi, MongoDB Compass
-8. **ZSH** - Shell + Oh My Zsh + Powerlevel10k + cambio de shell
-9. **Configuración** - Hyprland, asociaciones MIME
-10. **Cloudflare WARP** - VPN y configuración
+7. **Llavero de contraseñas** - GNOME Keyring (Secret Service API)
+8. **Entorno gráfico** - Hyprland, Dolphin, mpv, imv, Rofi, MongoDB Compass
+9. **ZSH** - Shell + Oh My Zsh + Powerlevel10k + cambio de shell
+10. **Configuración** - Hyprland, asociaciones MIME
 11. **Instaladores opcionales** - Kitty, Bun, DevTools, Neovim, Docker, SSH
 12. **Herramientas adicionales** - opencode.ai
 13. **Finalización** - Documentación y guías
@@ -233,15 +231,9 @@ El script principal sigue este orden **optimizado** para evitar problemas:
 - **Lombok para Java:** Se instala automáticamente en `/usr/share/java/lombok/lombok.jar` para soporte de desarrollo Java con anotaciones
 - Neovim se instala después de DevTools para garantizar compatibilidad con JDK y Maven
 
-#### 🌐 Cloudflare WARP
-- Durante la instalación se pregunta si deseas habilitarlo inmediatamente
-- Opcionalmente se configura para iniciarse automáticamente con Hyprland
-- Comando manual: `warp-cli connect` / `warp-cli disconnect`
-- Para ver estado: `warp-cli status`
-
 #### 📚 Guía de Comandos Rápida
 - Después de la instalación, escribe `h` en la terminal para ver una guía completa de todos los comandos útiles
-- La guía incluye comandos para: WARP, Docker, NVM, Bun, Maven, Hyprland, GNOME Keyring, y más
+- La guía incluye comandos para: Docker, NVM, Bun, Maven, Hyprland, GNOME Keyring, y más
 - Archivo ubicado en: `~/COMANDOS.md`
 
 #### 🔐 Llavero de Contraseñas (GNOME Keyring)
@@ -313,7 +305,6 @@ This repository contains a set of **modular and organized scripts** to automate 
 ✅ **ZSH + Oh My Zsh + Powerlevel10k auto-configured**
 ✅ **Neovim with custom configurations**
 ✅ **Development tools (NVM, JDK 25, Maven, Docker)**
-✅ **Cloudflare WARP integrated**
 ✅ **Nerd Fonts for terminal**
 
 ### Installed Tools and Components
@@ -339,6 +330,7 @@ This repository contains a set of **modular and organized scripts** to automate 
 - **Multimedia codecs** - FFmpeg, GStreamer (all plugins)
 - **CPU microcode** - AMD/Intel (automatic detection)
 - **GPU drivers** - NVIDIA/AMD/Intel (automatic detection)
+- **TRIM** - Automatic maintenance for SSDs ([See Documentation](configure_trim/README.md))
 
 #### 🐚 Shell and CLI Tools
 - **ZSH** - Default shell
@@ -362,7 +354,6 @@ This repository contains a set of **modular and organized scripts** to automate 
 - **MongoDB Compass** - MongoDB GUI client with auto-update
 
 #### 🌐 Network and Security
-- **Cloudflare WARP** - VPN and secure DNS
 - **SSH** - SSH server configuration
 - **GNOME Keyring** - Password keyring system (Secret Service API)
 
@@ -411,15 +402,14 @@ The main script follows this **optimized** order to avoid issues:
 
 1. **Base system** - Update and dependencies
 2. **Drivers and utilities** - NetworkManager, PipeWire, Codecs
-3. **Hardware** - CPU microcode, GPU drivers
+3. **Hardware** - CPU microcode, GPU drivers, **TRIM for SSDs**
 4. **Yay (AUR Helper)** - For AUR packages
-5. **AUR packages** - Chrome, OnlyOffice, WARP
+5. **AUR packages** - Chrome, OnlyOffice
 6. **Fonts** - Nerd Fonts and icons
-6.5. **Password keyring** - GNOME Keyring (Secret Service API)
-7. **Graphical environment** - Hyprland, Dolphin, mpv, imv, Rofi, MongoDB Compass
-8. **ZSH** - Shell + Oh My Zsh + Powerlevel10k + shell change
-9. **Configuration** - Hyprland, MIME associations
-10. **Cloudflare WARP** - VPN and configuration
+7. **Password keyring** - GNOME Keyring (Secret Service API)
+8. **Graphical environment** - Hyprland, Dolphin, mpv, imv, Rofi, MongoDB Compass
+9. **ZSH** - Shell + Oh My Zsh + Powerlevel10k + shell change
+10. **Configuration** - Hyprland, MIME associations
 11. **Optional installers** - Kitty, Bun, DevTools, Neovim, Docker, SSH
 12. **Additional tools** - opencode.ai
 13. **Finalization** - Documentation and guides

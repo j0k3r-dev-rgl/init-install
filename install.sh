@@ -458,14 +458,4 @@ echo -e "${GREEN}COMANDOS ÚTILES:${NC}"
 echo "  • Para ver la guía completa de comandos: ${GREEN}h${NC}"
 echo "  • Para iniciar Hyprland: ${GREEN}start-hyprland${NC}"
 echo ""
-echo -e "${GREEN}CLOUDFLARE WARP:${NC}"
-if command -v warp-cli >/dev/null 2>&1; then
-    if warp-cli status | grep -q "Connected"; then
-        echo "  • WARP está conectado y activo"
-    else
-        echo "  • Para conectar WARP: ${GREEN}warp-cli connect${NC}"
-        echo "  • Para desconectar WARP: ${GREEN}warp-cli disconnect${NC}"
-        echo "  • Para ver estado: ${GREEN}warp-cli status${NC}"
-    fi
-fi
-echo ""
+

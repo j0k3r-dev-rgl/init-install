@@ -108,53 +108,7 @@ ps aux | grep gnome-keyring     # Verificar que esté corriendo
 systemctl --user status gnome-keyring-daemon.service
 ```
 
----
 
-## 🌐 Cloudflare WARP
-
-### Comandos de Conexión
-```bash
-warp-cli registration new            # Registrar nuevo cliente (primera vez)
-warp-cli connect                      # Conectar a WARP
-warp-cli disconnect                   # Desconectar de WARP
-warp-cli status                       # Ver estado de conexión
-```
-
-### Modos de WARP
-```bash
-warp-cli mode doh                     # Modo DNS only (DoH)
-warp-cli mode warp                    # Modo WARP completo
-warp-cli mode warp+doh                # WARP + DoH
-```
-
-### Protección Familiar (1.1.1.1 for Families)
-```bash
-warp-cli dns families off             # Desactivar protección
-warp-cli dns families malware         # Bloquear malware
-warp-cli dns families full            # Bloquear malware + contenido adulto
-```
-
-### Verificar Conexión
-```bash
-curl https://www.cloudflare.com/cdn-cgi/trace/    # Verificar que WARP esté activo (warp=on)
-```
-
-### Diagnóstico
-```bash
-sudo warp-diag                        # Generar archivo de diagnóstico
-sudo warp-diag feedback               # Enviar feedback al equipo de WARP
-```
-
-### Servicio Systemd
-```bash
-sudo systemctl status warp-svc        # Ver estado del servicio
-sudo systemctl start warp-svc         # Iniciar servicio
-sudo systemctl stop warp-svc          # Detener servicio
-sudo systemctl enable warp-svc        # Habilitar al inicio
-sudo systemctl disable warp-svc       # Deshabilitar al inicio
-```
-
----
 
 ## 🐳 Docker
 
