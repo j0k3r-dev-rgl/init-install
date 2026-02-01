@@ -1,24 +1,24 @@
 Host kvm4
-    HostName /* host 1 */
+    HostName 127.0.0.1
     User root
-    IdentityFile ~/.ssh/id_ed25519
+    IdentityFile ~/.ssh/server
     Port 22
     ForwardAgent yes
 
 Host kvm2
-    HostName /* host 2 */
+    HostName 127.0.0.1
     User root
-    IdentityFile ~/.ssh/id_ed25519
+    IdentityFile ~/.ssh/server
     Port 22
 
-Host github.mauricio
+Host github-mauricio
     HostName github.com
     User git
-    IdentityFile ~/.ssh/id_mauricio1990
+    IdentityFile ~/.ssh/mauricio
     IdentitiesOnly yes
 
 Host github-j0k3r
     HostName github.com
     User git
-    IdentityFile ~/.ssh/id_j0k3r
+    IdentityFile ~/.ssh/j0k3r
     IdentitiesOnly yes
