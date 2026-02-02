@@ -177,7 +177,29 @@ echo -e "\n${GREEN}[PASO 6/13] Instalando fuentes (TTF e iconos)...${NC}"
 pacman_install ttf-font-awesome ttf-jetbrains-mono-nerd noto-fonts-emoji ttf-liberation ttf-dejavu
 
 # ==============================================================================
-# PASO 6.5: INSTALACIÓN Y CONFIGURACIÓN DEL LLAVERO DE CONTRASEÑAS
+# PASO 7: INSTALACIÓN Y CONFIGURACIÓN DE ZSH
+# ==============================================================================
+echo -e "\n${GREEN}[PASO 9/13] Configurando ZSH como shell por defecto...${NC}"
+
+# 8.1. Instalación de ZSH, Oh My Zsh, plugins y Powerlevel10k
+ZSH_INSTALLER="$SCRIPT_DIR/zsh/install_zsh.sh"
+if [ -f "$ZSH_INSTALLER" ]; then
+    chmod +x "$ZSH_INSTALLER" 2>/dev/null || true
+    bash "$ZSH_INSTALLER"
+else
+    print_info "Instalador de ZSH no encontrado, saltando..."
+fi
+
+# 8.2. Cambiar shell por defecto a ZSH
+ZSH_CHANGER="$SCRIPT_DIR/zsh/change_shell.sh"
+if [ -f "$ZSH_CHANGER" ]; then
+    chmod +x "$ZSH_CHANGER" 2>/dev/null || true
+    bash "$ZSH_CHANGER"
+else
+    print_info "Script de cambio de shell no encontrado, saltando..."
+fi
+# ==============================================================================
+# PASO 7.5: INSTALACIÓN Y CONFIGURACIÓN DEL LLAVERO DE CONTRASEÑAS
 # ==============================================================================
 echo -e "\n${GREEN}[PASO 7/13] Configurando llavero de contraseñas (GNOME Keyring)...${NC}"
 
@@ -200,7 +222,7 @@ else
 fi
 
 # ==============================================================================
-# PASO 7: INSTALACIÓN DE ENTORNO GRÁFICO Y APLICACIONES
+# PASO 8: INSTALACIÓN DE ENTORNO GRÁFICO Y APLICACIONES
 # ==============================================================================
 echo -e "\n${GREEN}[PASO 8/13] Instalando entorno gráfico y aplicaciones...${NC}"
 
@@ -229,29 +251,6 @@ if [ -f "$ROFI_INSTALLER" ]; then
     bash "$ROFI_INSTALLER"
 else
     print_info "Instalador de Rofi no encontrado, saltando..."
-fi
-
-# ==============================================================================
-# PASO 8: INSTALACIÓN Y CONFIGURACIÓN DE ZSH
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 9/13] Configurando ZSH como shell por defecto...${NC}"
-
-# 8.1. Instalación de ZSH, Oh My Zsh, plugins y Powerlevel10k
-ZSH_INSTALLER="$SCRIPT_DIR/zsh/install_zsh.sh"
-if [ -f "$ZSH_INSTALLER" ]; then
-    chmod +x "$ZSH_INSTALLER" 2>/dev/null || true
-    bash "$ZSH_INSTALLER"
-else
-    print_info "Instalador de ZSH no encontrado, saltando..."
-fi
-
-# 8.2. Cambiar shell por defecto a ZSH
-ZSH_CHANGER="$SCRIPT_DIR/zsh/change_shell.sh"
-if [ -f "$ZSH_CHANGER" ]; then
-    chmod +x "$ZSH_CHANGER" 2>/dev/null || true
-    bash "$ZSH_CHANGER"
-else
-    print_info "Script de cambio de shell no encontrado, saltando..."
 fi
 
 # ==============================================================================

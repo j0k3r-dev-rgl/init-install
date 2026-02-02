@@ -1,3 +1,5 @@
+require("core.java-helpers").generate_class_template()
+
 local ok, jdtls = pcall(require, "jdtls")
 if not ok then
     vim.notify("nvim-jdtls not installed", vim.log.levels.WARN)
@@ -170,3 +172,4 @@ local config = {
 
 
 jdtls.start_or_attach(config)
+

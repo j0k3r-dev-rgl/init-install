@@ -15,7 +15,6 @@ vim.api.nvim_create_autocmd('FileType', {
         pcall(vim.treesitter.start) -- pcall para evitar errores si no hay parser
     end,
 })
-
 -- Configuración de diagnósticos
 vim.diagnostic.config({
     virtual_text = {
@@ -31,11 +30,11 @@ vim.diagnostic.config({
         },
     },
     underline = true,
-    update_in_insert = false,
+    update_in_insert = true,
     severity_sort = true,
     float = {
         border = 'rounded',
-        source = 'always',
+        source = true,
         header = '',
         prefix = '',
     },

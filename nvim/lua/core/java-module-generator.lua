@@ -15,10 +15,10 @@ function M.create_java_module()
     local capitalized_module_name = lower_module_name:sub(1, 1):upper() .. lower_module_name:sub(2)
 
     -- Base path relative to project root
-    local base_path = "src/main/java/com/sistemasias/sias/modules/" .. lower_module_name .. "/"
+    local base_path = "src/main/java/com/sistemasias/ar/modules/" .. lower_module_name .. "/"
 
     -- Base package declaration prefix (Note: "package " keyword added)
-    local base_package = "package com.sistemasias.sias.modules." .. lower_module_name
+    local base_package = "package com.sistemasias.ar.modules." .. lower_module_name
 
     local directories = {
         "domain/entities",
