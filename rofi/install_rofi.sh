@@ -52,9 +52,21 @@ chmod +x setup.sh
 
 print_success "Temas de Rofi instalados"
 
-# 5. Limpiar
+# 4. Limpiar
 rm -rf "$TEMP_DIR"
 
+# 5. Fijar launcher: type-7 / style-1
+print_info "Configurando launcher type-7 style-1..."
+
+LAUNCHER="$HOME/.config/rofi/launchers/type-7/launcher.sh"
+if [ -f "$LAUNCHER" ]; then
+    sed -i "s/^theme=.*/theme='style-1'/" "$LAUNCHER"
+    chmod +x "$LAUNCHER"
+    print_success "Launcher configurado: type-7 / style-1"
+else
+    print_info "launcher.sh no encontrado, omitiendo configuración de tema"
+fi
+
 print_success "==== Rofi instalado y configurado correctamente ===="
-print_info "Tema por defecto: Type-7 Style-1"
+print_info "Tema activo: Type-7 Style-1"
 print_info "Ejecuta: Super + D"

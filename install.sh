@@ -253,6 +253,15 @@ else
     print_info "Instalador de Rofi no encontrado, saltando..."
 fi
 
+# 7.4. Waybar + swaync + wlogout (barra superior y notificaciones)
+WAYBAR_INSTALLER="$SCRIPT_DIR/waybar/install_waybar.sh"
+if [ -f "$WAYBAR_INSTALLER" ]; then
+    chmod +x "$WAYBAR_INSTALLER" 2>/dev/null || true
+    bash "$WAYBAR_INSTALLER"
+else
+    print_info "Instalador de Waybar no encontrado, saltando..."
+fi
+
 # ==============================================================================
 # PASO 9: CONFIGURACIÓN DE HYPRLAND Y ASOCIACIONES MIME
 # ==============================================================================
@@ -265,15 +274,6 @@ if [ -f "$HYPRLAND_CONFIGURATOR" ]; then
     bash "$HYPRLAND_CONFIGURATOR"
 else
     print_info "Configurador de Hyprland no encontrado, saltando..."
-fi
-
-# 9.2. Configuración de asociaciones MIME (aplicaciones por defecto)
-MIME_CONFIGURATOR="$SCRIPT_DIR/desktop_apps/configure_mime.sh"
-if [ -f "$MIME_CONFIGURATOR" ]; then
-    chmod +x "$MIME_CONFIGURATOR" 2>/dev/null || true
-    bash "$MIME_CONFIGURATOR"
-else
-    print_info "Configurador de MIME no encontrado, saltando..."
 fi
 
 # ==============================================================================
@@ -335,7 +335,25 @@ if [ -t 0 ] && [ -t 1 ]; then
     esac
 fi
 
-# 11.5. Instalación de Neovim (después de DevTools para soporte de Java/Lombok)
+# 11.5. Instalación de Yazi
+if [ -t 0 ] && [ -t 1 ]; then
+    echo -n "¿Deseas instalar Yazi (gestor de archivos terminal) ahora? (s/n, por defecto: n): "
+    read -r install_yazi
+    case "$install_yazi" in
+        [sS]|[sS][iI])
+            YAZI_INSTALLER="$SCRIPT_DIR/yazi/install_yazi.sh"
+            if [ -f "$YAZI_INSTALLER" ]; then
+                chmod +x "$YAZI_INSTALLER" 2>/dev/null || true
+                bash "$YAZI_INSTALLER"
+            else
+                echo -e "${RED}No se encontró el instalador de Yazi en $YAZI_INSTALLER${NC}"
+            fi
+            ;;
+        *) ;;
+    esac
+fi
+
+# 11.6. Instalación de Neovim (después de DevTools para soporte de Java)
 if [ -t 0 ] && [ -t 1 ]; then
     echo -n "¿Deseas instalar Neovim ahora? (s/n, por defecto: n): "
     read -r install_nvim
@@ -344,23 +362,16 @@ if [ -t 0 ] && [ -t 1 ]; then
             NVIM_INSTALLER="$SCRIPT_DIR/nvim/install.sh"
             if [ -f "$NVIM_INSTALLER" ]; then
                 chmod +x "$NVIM_INSTALLER" 2>/dev/null || true
-                # Ejecutar en zsh si está disponible y es el shell por defecto
-                ZSH_BIN="$(command -v zsh 2>/dev/null || true)"
-                if [ -n "$ZSH_BIN" ] && [ "${SHELL:-}" = "$ZSH_BIN" ]; then
-                    zsh "$NVIM_INSTALLER"
-                else
-                    bash "$NVIM_INSTALLER"
-                fi
+                bash "$NVIM_INSTALLER"
             else
                 echo -e "${RED}No se encontró el instalador de Neovim en $NVIM_INSTALLER${NC}"
             fi
             ;;
-        *)
-            ;;
+        *) ;;
     esac
 fi
 
-# 11.6. Instalación de Docker
+# 11.7. Instalación de Docker
 if [ -t 0 ] && [ -t 1 ]; then
     echo -n "¿Deseas instalar Docker + Docker Compose ahora? (s/n, por defecto: n): "
     read -r install_docker

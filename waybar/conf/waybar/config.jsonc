@@ -1,0 +1,165 @@
+// -*- mode: jsonc -*-
+{
+    "layer": "top",
+    "position": "top",
+    "height": 48,
+    "margin-top": 8,
+    "margin-left": 12,
+    "margin-right": 12,
+    "spacing": 0,
+    "exclusive": true,
+
+    "modules-left": [
+        "cpu",
+        "memory",
+        "disk",
+        "network"
+    ],
+
+    "modules-center": [
+        "hyprland/window"
+    ],
+
+    "modules-right": [
+        "custom/swaync",
+        "pulseaudio",
+        "custom/theme",
+        "custom/power"
+    ],
+
+    // ─── Recursos ───────────────────────────────────────────────────────────
+
+    "cpu": {
+        "interval": 2,
+        "format": "󰻠 {usage}%",
+        "format-alt": "󰻠 {avg_frequency}GHz",
+        "tooltip-format": "Uso: {usage}%\nFrecuencia: {avg_frequency}GHz",
+        "states": {
+            "warning": 70,
+            "critical": 90
+        }
+    },
+
+    "memory": {
+        "interval": 3,
+        "format": "󰍛 {used:.1f}G",
+        "format-alt": "󰍛 {percentage}%",
+        "tooltip-format": "RAM: {used:.1f}G / {total:.1f}G ({percentage}%)\nSwap: {swapUsed:.1f}G / {swapTotal:.1f}G",
+        "states": {
+            "warning": 70,
+            "critical": 90
+        }
+    },
+
+    "disk": {
+        "interval": 30,
+        "format": "󰋊 {percentage_used}%",
+        "path": "/",
+        "tooltip-format": "Disco: {used} / {total}\nLibre: {free} ({percentage_free}%)",
+        "states": {
+            "warning": 75,
+            "critical": 90
+        }
+    },
+
+    "temperature": {
+        "critical-threshold": 80,
+        "interval": 3,
+        "format": "{icon} {temperatureC}°C",
+        "format-icons": ["󰜗", "󰜗", "󰜗", "󰔏", "󰔏"],
+        "tooltip": false
+    },
+
+    "network": {
+        "interval": 2,
+        "format-wifi": "󰇚 {bandwidthDownBytes} 󰕒 {bandwidthUpBytes}",
+        "format-ethernet": "󰇚 {bandwidthDownBytes} 󰕒 {bandwidthUpBytes}",
+        "format-disconnected": "󰤭 Sin red",
+        "format-linked": "󰈀 Sin IP",
+        "tooltip-format-wifi": "{essid} ({signalStrength}%)\n󰇚 {bandwidthDownBytes}  󰕒 {bandwidthUpBytes}",
+        "tooltip-format-ethernet": "{ifname}: {ipaddr}\n󰇚 {bandwidthDownBytes}  󰕒 {bandwidthUpBytes}",
+        "tooltip-format-disconnected": "Sin conexion"
+    },
+
+    // ─── Ventana activa ──────────────────────────────────────────────────────
+
+    "hyprland/window": {
+        "format": "{}",
+        "max-length": 70,
+        "separate-outputs": true,
+        "rewrite": {
+            "(.*) — Mozilla Firefox": "󰈹  $1",
+            "(.*)Mozilla Firefox": "󰈹  Firefox",
+            "(.*) - Visual Studio Code": "󰨞  $1",
+            "(.*)Visual Studio Code": "󰨞  VSCode",
+            "(.*) - Neovim": "  $1",
+            "(.*)Neovim": "  Neovim",
+            "(.*)kitty": "  Terminal",
+            "(.*)Alacritty": "  Terminal",
+            "(.*)foot": "  Terminal",
+            "(.*)Thunar": "  Thunar",
+            "(.*)Dolphin": "  Dolphin",
+            "(.*)Discord": "󰙯  Discord",
+            "(.*)Spotify": "󰓇  Spotify",
+            "(.*)Steam": "󰓺  Steam",
+            "": "󰇄  Escritorio"
+        }
+    },
+
+    // ─── Volumen ─────────────────────────────────────────────────────────────
+
+    "pulseaudio": {
+        "scroll-step": 5,
+        "format": "{icon} {volume}%",
+        "format-muted": "󰝟 Muted",
+        "format-icons": {
+            "headphone": "󰋋",
+            "headset": "󰋎",
+            "default": ["󰕿", "󰖀", "󰕾"]
+        },
+        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+",
+        "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-",
+        "tooltip-format": "Volumen: {volume}%\nDispositivo: {desc}"
+    },
+
+    // ─── Swaync (notificaciones) ─────────────────────────────────────────────
+
+    "custom/swaync": {
+        "format": "{icon}  {text}",
+        "format-icons": {
+            "none": "󰂚",
+            "notification": "󰂚",
+            "dnd-none": "󰂛",
+            "dnd-notification": "󰂛",
+            "inhibited-none": "󰂚",
+            "inhibited-notification": "󰂚",
+            "dnd-inhibited-none": "󰂛",
+            "dnd-inhibited-notification": "󰂛"
+        },
+        "return-type": "json",
+        "exec-if": "which swaync-client",
+        "exec": "swaync-client -swb",
+        "on-click": "swaync-client -t -sw",
+        "on-click-right": "swaync-client -d -sw",
+        "escape": true,
+        "tooltip": true
+    },
+
+    // ─── Selector de tema ────────────────────────────────────────────────────
+
+    "custom/theme": {
+        "format": "󰏘",
+        "tooltip": true,
+        "tooltip-format": "Cambiar colores del tema",
+        "on-click": "setsid python3 HOME_PLACEHOLDER/.config/waybar/color-picker.py &"
+    },
+
+    // ─── Boton de apagado ────────────────────────────────────────────────────
+
+    "custom/power": {
+        "format": "󰐥",
+        "tooltip": false,
+        "on-click": "wlogout --protocol layer-shell -b 4 -c 16 -r 16 -L 550 -R 550 -T 400 -B 400"
+    }
+}

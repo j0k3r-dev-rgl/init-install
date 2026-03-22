@@ -33,7 +33,7 @@ Hyprland                    # Iniciar Hyprland directamente
 - `SUPER + Q` - Cerrar ventana
 - `SUPER + T` - Abrir terminal (Kitty)
 - `SUPER + D` - Abrir launcher (Rofi)
-- `SUPER + E` - Abrir gestor de archivos (Dolphin)
+- `SUPER + E` - Abrir gestor de archivos (Yazi)
 - `SUPER + F` - Pantalla completa
 - `SUPER + V` - Cambiar a modo flotante
 
