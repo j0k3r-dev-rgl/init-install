@@ -13,6 +13,10 @@ from typing import Callable
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 CONFIG_FILE = Path.home() / ".init-install.conf"
+MUTUAL_EXCLUSIONS: dict[str, list[str]] = {
+    "keyring": ["keepassxc"],
+    "keepassxc": ["keyring"],
+}
 
 
 @dataclass(frozen=True)
@@ -355,6 +359,23 @@ Acciones:
         ),
     ),
     Category(
+        "keepassxc",
+        "KeePassXC",
+        "Gestor de contraseñas y SSH Agent (alternativa a GNOME Keyring)",
+        """KeePassXC + libsecret:
+- Gestor de contraseñas moderno
+- SSH Agent integrado
+- Wayland compatible
+- Funciona con MongoDB Compass
+
+Paquetes:
+- keepassxc
+- libsecret
+
+mutual_exclusion: gnome_keyring""",
+        (str(SCRIPT_DIR / "keepassxc" / "install_keepassxc.sh"),),
+    ),
+    Category(
         "mongodb_compass",
         "MongoDB Compass",
         "Instala MongoDB Compass desde el binario oficial",
@@ -433,6 +454,10 @@ class InstallerApp:
     def toggle_current(self) -> None:
         category = self.categories[self.current_index]
         self.selections[category.key] = not self.selections[category.key]
+        if self.selections[category.key]:
+            for excluded in MUTUAL_EXCLUSIONS.get(category.key, []):
+                if excluded in self.selections:
+                    self.selections[excluded] = False
         self.save_selections()
 
     def toggle_all(self) -> None:
@@ -595,6 +620,10 @@ class InstallerApp:
             self.stdscr.refresh()
             self.stdscr.getch()
             return
+
+    def append_log(self, logs: list[str], message: str, current: int, total: int, category_title: str) -> None:
+        logs.append(message)
+        self.draw_install_screen(current, total, category_title, logs)
 
     def run_installation(self) -> None:
         selected = self.selected_categories()
