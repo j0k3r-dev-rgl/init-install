@@ -3,11 +3,40 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="${HOME}/.init-install.conf"
+LOG_FILE=""
 
-# --- Colores para la salida ---
 GREEN='\033[0;32m'
 RED='\033[0;31m'
-NC='\033[0m' # No Color
+NC='\033[0m'
+
+declare -a CATEGORY_ORDER=(
+    system_base
+    homebrew
+    yay_install
+    drivers_utilities
+    hyprland
+    waybar
+    swaync
+    wlogout
+    rofi
+    kitty
+    nvim
+    yazi
+    docker
+    system_essentials
+    zsh
+    keyring
+    mongodb_compass
+    opencode
+    post_install
+)
+
+declare -A CATEGORY_TITLE
+declare -A CATEGORY_SUMMARY
+declare -A CATEGORY_SCRIPTS
+declare -A CATEGORY_PACKAGES
+declare -A CATEGORY_SELECTED
 
 print_info() {
     echo -e "${GREEN}[INFO]${NC} $*"
@@ -22,462 +51,426 @@ die() {
     exit 1
 }
 
+cleanup() {
+    if [ -n "$LOG_FILE" ] && [ -f "$LOG_FILE" ]; then
+        rm -f "$LOG_FILE"
+    fi
+}
+
+trap cleanup EXIT
+trap 'die "El script falló en la línea $LINENO"' ERR
+
 require_cmd() {
     command -v "$1" >/dev/null 2>&1 || die "Falta el comando requerido: $1"
 }
 
-pacman_install() {
-    sudo pacman -S --needed --noconfirm "$@"
+copy_if_missing() {
+    local src="$1"
+    local dst="$2"
+
+    mkdir -p "$(dirname "$dst")"
+    if [ -e "$dst" ]; then
+        print_info "Ya existe $(basename "$dst"), no se sobreescribe"
+        return 0
+    fi
+
+    cp "$src" "$dst"
+    print_success "Copiado: $dst"
 }
 
-trap 'die "El script falló en la línea $LINENO"' ERR
+init_categories() {
+    CATEGORY_TITLE[system_base]="Sistema base"
+    CATEGORY_SUMMARY[system_base]="Actualiza el sistema e instala paquetes base esenciales"
+    CATEGORY_SCRIPTS[system_base]="$SCRIPT_DIR/system_base/install_base.sh"
+    CATEGORY_PACKAGES[system_base]=$'Actualización:\n- pacman -Syu\n\nPaquetes:\n- base\n- base-devel\n- linux\n- linux-firmware\n- grub\n- efibootmgr\n- sudo\n- git\n- curl\n- wget\n- jq\n- nano\n- unzip\n- 7zip\n- tree'
 
-require_cmd sudo
+    CATEGORY_TITLE[homebrew]="Homebrew"
+    CATEGORY_SUMMARY[homebrew]="Instala Homebrew global y de usuario"
+    CATEGORY_SCRIPTS[homebrew]="$SCRIPT_DIR/homebrew/install_homebrew.sh"
+    CATEGORY_PACKAGES[homebrew]=$'Paquetes base para Homebrew:\n- base-devel\n- procps-ng\n- curl\n- file\n- git\n\nAcciones:\n- instala Homebrew global en /home/linuxbrew/.linuxbrew\n- instala Homebrew de usuario en ~/.linuxbrew\n- agrega shellenv a ~/.zshrc y ~/.bashrc'
+
+    CATEGORY_TITLE[yay_install]="Yay y AUR"
+    CATEGORY_SUMMARY[yay_install]="Instala yay y paquetes AUR necesarios"
+    CATEGORY_SCRIPTS[yay_install]="$SCRIPT_DIR/yay_install/install_yay_packages.sh"
+    CATEGORY_PACKAGES[yay_install]=$'Paquetes/acciones:\n- yay (si no existe)\n- google-chrome\n- wlogout'
+
+    CATEGORY_TITLE[drivers_utilities]="Drivers y utilidades"
+    CATEGORY_SUMMARY[drivers_utilities]="Red, audio, códecs, microcódigo, GPU y TRIM"
+    CATEGORY_SCRIPTS[drivers_utilities]="$SCRIPT_DIR/drivers_utilities/network_install.sh|$SCRIPT_DIR/drivers_utilities/audio_install.sh|$SCRIPT_DIR/drivers_utilities/codecs_install.sh|$SCRIPT_DIR/drivers_utilities/cpu_microcode_install.sh|$SCRIPT_DIR/drivers_utilities/gpu_drivers_install.sh|$SCRIPT_DIR/drivers_utilities/configure_trim.sh"
+    CATEGORY_PACKAGES[drivers_utilities]=$'Red:\n- networkmanager\n- network-manager-applet\n\nAudio:\n- pipewire\n- pipewire-alsa\n- pipewire-pulse\n- pipewire-jack\n- wireplumber\n- pavucontrol\n\nCódecs:\n- ffmpeg\n- gst-plugins-base\n- gst-plugins-good\n- gst-plugins-bad\n- gst-plugins-ugly\n- gst-libav\n\nMicrocódigo (según CPU):\n- amd-ucode\n- intel-ucode\n\nGPU (según hardware):\n- NVIDIA: nvidia, nvidia-utils, nvidia-settings\n- AMD: mesa, vulkan-radeon, libva-mesa-driver\n- Intel: mesa, vulkan-intel, intel-media-driver, libva-mesa-driver\n\nAcciones:\n- habilita NetworkManager\n- configura fstrim.timer diario'
+
+    CATEGORY_TITLE[hyprland]="Hyprland"
+    CATEGORY_SUMMARY[hyprland]="Instala Hyprland y su configuración"
+    CATEGORY_SCRIPTS[hyprland]="$SCRIPT_DIR/hyprland/install_hyprland.sh"
+    CATEGORY_PACKAGES[hyprland]=$'Paquetes:\n- hyprland\n\nAcciones:\n- ejecuta configure_hyprland.sh\n- copia configuración de Hyprland sin sobreescribir archivos existentes'
+
+    CATEGORY_TITLE[waybar]="Waybar"
+    CATEGORY_SUMMARY[waybar]="Instala Waybar y copia su configuración"
+    CATEGORY_SCRIPTS[waybar]="$SCRIPT_DIR/waybar/install_waybar.sh"
+    CATEGORY_PACKAGES[waybar]=$'Paquetes:\n- waybar\n- python-gobject\n\nAcciones:\n- copia configs a ~/.config/waybar'
+
+    CATEGORY_TITLE[swaync]="swaync"
+    CATEGORY_SUMMARY[swaync]="Instala centro de notificaciones swaync"
+    CATEGORY_SCRIPTS[swaync]="$SCRIPT_DIR/swaync/install_swaync.sh"
+    CATEGORY_PACKAGES[swaync]=$'Paquetes:\n- swaync\n- python-gobject\n\nAcciones:\n- copia configs a ~/.config/swaync'
+
+    CATEGORY_TITLE[wlogout]="wlogout"
+    CATEGORY_SUMMARY[wlogout]="Instala wlogout desde AUR y copia configuración"
+    CATEGORY_SCRIPTS[wlogout]="$SCRIPT_DIR/wlogout/install_wlogout.sh"
+    CATEGORY_PACKAGES[wlogout]=$'Paquetes:\n- wlogout (AUR)\n\nAcciones:\n- requiere yay\n- copia configs a ~/.config/wlogout'
+
+    CATEGORY_TITLE[rofi]="Rofi"
+    CATEGORY_SUMMARY[rofi]="Instala Rofi y sus launchers"
+    CATEGORY_SCRIPTS[rofi]="$SCRIPT_DIR/rofi/install_rofi.sh"
+    CATEGORY_PACKAGES[rofi]=$'Paquetes:\n- rofi\n\nAcciones:\n- copia configs a ~/.config/rofi\n- marca scripts .sh y .py como ejecutables'
+
+    CATEGORY_TITLE[kitty]="Kitty"
+    CATEGORY_SUMMARY[kitty]="Instala Kitty y copia configuración"
+    CATEGORY_SCRIPTS[kitty]="$SCRIPT_DIR/kitty/install_kitty.sh"
+    CATEGORY_PACKAGES[kitty]=$'Paquetes:\n- kitty\n\nAcciones:\n- copia configs a ~/.config/kitty'
+
+    CATEGORY_TITLE[nvim]="Neovim"
+    CATEGORY_SUMMARY[nvim]="Instala Neovim nightly y su configuración local"
+    CATEGORY_SCRIPTS[nvim]="$SCRIPT_DIR/nvim/install.sh"
+    CATEGORY_PACKAGES[nvim]=$'Paquetes:\n- git\n- gcc\n- make\n- unzip\n- ripgrep\n- fd\n- nodejs\n- npm\n- python\n- python-pip\n- python-pynvim\n- tree-sitter\n- tree-sitter-cli\n- wl-clipboard\n\nAcciones:\n- npm install -g neovim\n- descarga Neovim nightly a /opt/nvim-linux-x86_64\n- agrega /opt/nvim-linux-x86_64/bin al PATH\n- copia configs a ~/.config/nvim'
+
+    CATEGORY_TITLE[yazi]="Yazi"
+    CATEGORY_SUMMARY[yazi]="Instala Yazi y copia configuración"
+    CATEGORY_SCRIPTS[yazi]="$SCRIPT_DIR/yazi/install_yazi.sh"
+    CATEGORY_PACKAGES[yazi]=$'Paquetes:\n- ffmpeg\n- 7zip\n- fd\n- ripgrep\n- fzf\n- zoxide\n- poppler\n- unzip\n\nAcciones:\n- descarga Yazi y ya\n- instala binarios en /usr/local/bin\n- copia configs a ~/.config/yazi'
+
+    CATEGORY_TITLE[docker]="Docker"
+    CATEGORY_SUMMARY[docker]="Instala Docker, docker-compose y habilita el servicio"
+    CATEGORY_SCRIPTS[docker]="$SCRIPT_DIR/docker/install_docker.sh"
+    CATEGORY_PACKAGES[docker]=$'Paquetes:\n- docker\n- docker-compose\n\nAcciones:\n- habilita docker.service\n- agrega el usuario al grupo docker'
+
+    CATEGORY_TITLE[system_essentials]="System essentials"
+    CATEGORY_SUMMARY[system_essentials]="Instala utilidades diarias del sistema"
+    CATEGORY_SCRIPTS[system_essentials]="$SCRIPT_DIR/system_essentials/install_essentials.sh"
+    CATEGORY_PACKAGES[system_essentials]=$'Paquetes:\n- btop\n- eza\n- fd\n- ripgrep\n- fzf\n- udiskie\n- brightnessctl\n- playerctl\n- python-gobject\n- zoxide\n\nExtra:\n- asegura wlogout con yay si está disponible'
+
+    CATEGORY_TITLE[zsh]="ZSH"
+    CATEGORY_SUMMARY[zsh]="Instala ZSH, Oh My Zsh y plugins"
+    CATEGORY_SCRIPTS[zsh]="$SCRIPT_DIR/zsh/install_zsh.sh"
+    CATEGORY_PACKAGES[zsh]=$'Paquetes:\n- zsh\n- fzf\n- eza\n\nAcciones:\n- instala Oh My Zsh\n- clona zsh-autosuggestions\n- clona zsh-syntax-highlighting\n- clona powerlevel10k\n- copia .zshrc si no existe\n- cambia el shell por defecto a zsh si aplica'
+
+    CATEGORY_TITLE[keyring]="GNOME Keyring"
+    CATEGORY_SUMMARY[keyring]="Instala y configura GNOME Keyring para login, Hyprland y SSH"
+    CATEGORY_SCRIPTS[keyring]="$SCRIPT_DIR/keyring/install_keyring.sh|$SCRIPT_DIR/keyring/configure_keyring.sh"
+    CATEGORY_PACKAGES[keyring]=$'Paquetes:\n- gnome-keyring\n- libsecret\n- seahorse\n- gcr-4\n\nAcciones:\n- configura PAM para login\n- configura autostart para Hyprland\n- habilita gcr-ssh-agent.socket\n- exporta SSH_AUTH_SOCK'
+
+    CATEGORY_TITLE[mongodb_compass]="MongoDB Compass"
+    CATEGORY_SUMMARY[mongodb_compass]="Instala MongoDB Compass desde el binario oficial"
+    CATEGORY_SCRIPTS[mongodb_compass]="$SCRIPT_DIR/mongodb_compass/install_compass.sh"
+    CATEGORY_PACKAGES[mongodb_compass]=$'Dependencias requeridas:\n- jq\n- wget\n\nAcciones:\n- descarga el release oficial más reciente\n- instala en /opt/mongo/mongoDBCompass\n- crea mongodb-compass.desktop en ~/.local/share/applications'
+
+    CATEGORY_TITLE[opencode]="Opencode"
+    CATEGORY_SUMMARY[opencode]="Instala Opencode y copia su configuración"
+    CATEGORY_SCRIPTS[opencode]="$SCRIPT_DIR/opencode/install_opencode.sh"
+    CATEGORY_PACKAGES[opencode]=$'Acciones:\n- instala opencode si no existe\n- copia opencode.json a ~/.config/opencode\n- agrega ~/.opencode/bin al PATH en ~/.zshrc'
+
+    CATEGORY_TITLE[post_install]="Post instalación"
+    CATEGORY_SUMMARY[post_install]="Copia MIME, instala el comando update y deja la guía final"
+    CATEGORY_SCRIPTS[post_install]="__internal_post_install__"
+    CATEGORY_PACKAGES[post_install]=$'Acciones:\n- copia mimeapps/mimeapps.list a ~/.config/mimeapps.list si no existe\n- instala el comando update desde system_update/install_update_command.sh\n- copia COMANDOS.md a ~/COMANDOS.md si existe'
+}
+
+default_selections() {
+    local category
+    for category in "${CATEGORY_ORDER[@]}"; do
+        CATEGORY_SELECTED["$category"]=ON
+    done
+}
+
+save_selections() {
+    {
+        printf '# init-install selections\n'
+        local category
+        for category in "${CATEGORY_ORDER[@]}"; do
+            printf '%s=%s\n' "$category" "${CATEGORY_SELECTED[$category]}"
+        done
+    } > "$CONFIG_FILE"
+}
+
+load_selections() {
+    default_selections
+
+    if [ ! -f "$CONFIG_FILE" ]; then
+        save_selections
+        return 0
+    fi
+
+    local line key value
+    while IFS='=' read -r key value; do
+        [ -n "$key" ] || continue
+        [[ "$key" =~ ^# ]] && continue
+
+        if [ -n "${CATEGORY_SELECTED[$key]+x}" ]; then
+            case "$value" in
+                ON|OFF)
+                    CATEGORY_SELECTED[$key]="$value"
+                    ;;
+            esac
+        fi
+    done < "$CONFIG_FILE"
+}
+
+set_all_selections() {
+    local value="$1"
+    local category
+    for category in "${CATEGORY_ORDER[@]}"; do
+        CATEGORY_SELECTED["$category"]="$value"
+    done
+    save_selections
+}
+
+sync_selections_from_output() {
+    local output="$1"
+    local category
+
+    for category in "${CATEGORY_ORDER[@]}"; do
+        CATEGORY_SELECTED["$category"]=OFF
+    done
+
+    local tag
+    for tag in $output; do
+        tag="${tag%\"}"
+        tag="${tag#\"}"
+        if [ -n "${CATEGORY_SELECTED[$tag]+x}" ]; then
+            CATEGORY_SELECTED[$tag]=ON
+        fi
+    done
+
+    save_selections
+}
+
+ensure_whiptail() {
+    if command -v whiptail >/dev/null 2>&1; then
+        return 0
+    fi
+
+    print_info "whiptail no está instalado. Instalando libnewt..."
+    sudo pacman -S --needed --noconfirm libnewt
+    require_cmd whiptail
+}
+
+show_welcome() {
+    whiptail \
+        --title "init-install" \
+        --msgbox "Selector interactivo para instalar el setup modular de Arch Linux.\n\nConfiguración guardada en:\n$CONFIG_FILE" \
+        12 70
+}
+
+build_checklist_args() {
+    local args=()
+    local category
+    for category in "${CATEGORY_ORDER[@]}"; do
+        args+=("$category" "${CATEGORY_TITLE[$category]} — ${CATEGORY_SUMMARY[$category]}" "${CATEGORY_SELECTED[$category]}")
+    done
+    printf '%s\n' "${args[@]}"
+}
+
+selected_categories() {
+    local selected=()
+    local category
+    for category in "${CATEGORY_ORDER[@]}"; do
+        if [ "${CATEGORY_SELECTED[$category]}" = "ON" ]; then
+            selected+=("$category")
+        fi
+    done
+
+    printf '%s\n' "${selected[@]}"
+}
+
+show_packages_menu() {
+    local args=()
+    local category
+    for category in "${CATEGORY_ORDER[@]}"; do
+        args+=("$category" "${CATEGORY_TITLE[$category]}")
+    done
+
+    while true; do
+        local selected_category
+        selected_category=$(whiptail \
+            --title "Paquetes por categoría" \
+            --menu "Elegí una categoría para ver qué instala." \
+            24 90 16 \
+            "${args[@]}" \
+            3>&1 1>&2 2>&3) || return 0
+
+        whiptail \
+            --title "${CATEGORY_TITLE[$selected_category]}" \
+            --msgbox "${CATEGORY_PACKAGES[$selected_category]}" \
+            28 90
+    done
+}
+
+run_post_install() {
+    print_info "[POST] Configurando MIME y comando update..."
+    copy_if_missing "$SCRIPT_DIR/mimeapps/mimeapps.list" "$HOME/.config/mimeapps.list"
+
+    local update_cmd_installer="$SCRIPT_DIR/system_update/install_update_command.sh"
+    if [ -f "$update_cmd_installer" ]; then
+        chmod +x "$update_cmd_installer" 2>/dev/null || true
+        bash "$update_cmd_installer"
+    fi
+
+    if [ -f "$SCRIPT_DIR/COMANDOS.md" ]; then
+        cp "$SCRIPT_DIR/COMANDOS.md" "$HOME/COMANDOS.md"
+        print_success "Guía disponible en ~/COMANDOS.md"
+    fi
+}
+
+run_category() {
+    local category="$1"
+    local script_group="${CATEGORY_SCRIPTS[$category]}"
+
+    if [ "$script_group" = "__internal_post_install__" ]; then
+        run_post_install
+        return 0
+    fi
+
+    local script_path
+    IFS='|' read -r -a script_paths <<< "$script_group"
+    for script_path in "${script_paths[@]}"; do
+        [ -f "$script_path" ] || die "No se encontró el script: $script_path"
+        chmod +x "$script_path" 2>/dev/null || true
+        bash "$script_path"
+    done
+}
+
+run_installation() {
+    local categories=("$@")
+    local total="${#categories[@]}"
+
+    if [ "$total" -eq 0 ]; then
+        whiptail --title "Nada seleccionado" --msgbox "No hay categorías seleccionadas para instalar." 10 60
+        return 0
+    fi
+
+    LOG_FILE="$(mktemp)"
+
+    if ! {
+        local index=0
+        local category percent
+
+        for category in "${categories[@]}"; do
+            index=$((index + 1))
+            percent=$((((index - 1) * 100) / total))
+            printf 'XXX\n%d\n[%d/%d] %s\nXXX\n' "$percent" "$index" "$total" "${CATEGORY_TITLE[$category]}"
+
+            if ! run_category "$category" >> "$LOG_FILE" 2>&1; then
+                printf 'XXX\n%d\nFalló: %s\nXXX\n' "$percent" "${CATEGORY_TITLE[$category]}"
+                return 1
+            fi
+
+            percent=$((index * 100 / total))
+            printf 'XXX\n%d\nCompletado: %s\nXXX\n' "$percent" "${CATEGORY_TITLE[$category]}"
+        done
+    } | whiptail --title "Instalando" --gauge "Iniciando instalación..." 10 78 0; then
+        local error_log
+        error_log="$(sed 's/\x1b\[[0-9;]*m//g' "$LOG_FILE")"
+        whiptail \
+            --title "Instalación fallida" \
+            --msgbox "La instalación se detuvo. Revisá el log:\n\n${error_log:0:3500}" \
+            28 100
+        return 1
+    fi
+
+    whiptail \
+        --title "Instalación completada" \
+        --msgbox "La instalación finalizó correctamente.\n\nLog guardado temporalmente en:\n$LOG_FILE" \
+        12 70
+}
+
+show_options_menu() {
+    while true; do
+        local option
+        option=$(whiptail \
+            --title "Opciones" \
+            --menu "Elegí una acción adicional." \
+            18 70 8 \
+            install_all "Instalar todas las categorías" \
+            select_all "Marcar todas las categorías" \
+            deselect_all "Desmarcar todas las categorías" \
+            view_packages "Ver paquetes por categoría" \
+            back "Volver al checklist" \
+            exit "Salir" \
+            3>&1 1>&2 2>&3) || return 0
+
+        case "$option" in
+            install_all)
+                run_installation "${CATEGORY_ORDER[@]}"
+                ;;
+            select_all)
+                set_all_selections ON
+                ;;
+            deselect_all)
+                set_all_selections OFF
+                ;;
+            view_packages)
+                show_packages_menu
+                ;;
+            back)
+                return 0
+                ;;
+            exit)
+                exit 0
+                ;;
+        esac
+    done
+}
+
+main_menu_loop() {
+    while true; do
+        mapfile -t checklist_args < <(build_checklist_args)
+
+        local selection_output status
+        local selected=()
+
+        if selection_output=$(whiptail \
+            --title "init-install" \
+            --checklist "Seleccioná las categorías a instalar.\n\nEspacio: marcar/desmarcar\nTab: cambiar botón" \
+            26 110 18 \
+            --ok-button "Instalar" \
+            --cancel-button "Salir" \
+            --extra-button \
+            --extra-label "Opciones" \
+            "${checklist_args[@]}" \
+            3>&1 1>&2 2>&3); then
+            status=0
+        else
+            status=$?
+        fi
+
+        case "$status" in
+            0)
+                sync_selections_from_output "$selection_output"
+                mapfile -t selected < <(selected_categories)
+                run_installation "${selected[@]}"
+                ;;
+            1)
+                break
+                ;;
+            3)
+                sync_selections_from_output "$selection_output"
+                show_options_menu
+                ;;
+        esac
+    done
+}
+
 require_cmd bash
+require_cmd sudo
+require_cmd pacman
 
 if ! command -v pacman >/dev/null 2>&1; then
     die "Este script está pensado para Arch/derivados (pacman no encontrado)."
 fi
 
-echo -e "${GREEN}╔════════════════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║  Iniciando instalación y configuración del sistema    ║${NC}"
-echo -e "${GREEN}╚════════════════════════════════════════════════════════╝${NC}"
-
-# ==============================================================================
-# PASO 0: LIMPIEZA PREVIA (OPCIONAL)
-# ==============================================================================
-if [ -t 0 ] && [ -t 1 ]; then
-    echo -n "¿Deseas limpiar configuraciones anteriores de ZSH/Oh My Zsh/Powerlevel10k? (s/n, por defecto: n): "
-    read -r clean_response
-    case "$clean_response" in
-        [sS]|[sS][iI])
-            echo -e "${GREEN}Realizando limpieza previa...${NC}"
-            rm -rf "$HOME/.oh-my-zsh" "$HOME/.p10k.zsh" "$HOME/.zshrc"
-            echo -e "${GREEN}Limpieza completada.${NC}"
-            ;;
-        *)
-            echo -e "${GREEN}Omitiendo limpieza previa.${NC}"
-            ;;
-    esac
-fi
-
-# ==============================================================================
-# PASO 1: ACTUALIZACIÓN DEL SISTEMA Y DEPENDENCIAS BASE
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 1/13] Actualizando sistema e instalando dependencias base...${NC}"
 sudo -v
-sudo pacman -Syu --noconfirm
-pacman_install git curl base-devel grim slurp wl-clipboard pciutils unzip
-
-require_cmd git
-require_cmd curl
-
-# ==============================================================================
-# PASO 2: INSTALACIÓN DE SERVICIOS DEL SISTEMA (DRIVERS Y UTILIDADES)
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 2/13] Instalando drivers y utilidades del sistema...${NC}"
-
-# 2.1. NetworkManager
-NETWORK_INSTALLER="$SCRIPT_DIR/drivers_utilities/network_install.sh"
-if [ -f "$NETWORK_INSTALLER" ]; then
-    chmod +x "$NETWORK_INSTALLER" 2>/dev/null || true
-    bash "$NETWORK_INSTALLER"
-else
-    print_info "Instalador de NetworkManager no encontrado, saltando..."
-fi
-
-# 2.2. Sistema de audio PipeWire
-AUDIO_INSTALLER="$SCRIPT_DIR/drivers_utilities/audio_install.sh"
-if [ -f "$AUDIO_INSTALLER" ]; then
-    chmod +x "$AUDIO_INSTALLER" 2>/dev/null || true
-    bash "$AUDIO_INSTALLER"
-else
-    print_info "Instalador de PipeWire no encontrado, saltando..."
-fi
-
-# 2.3. Códecs de video y multimedia
-CODECS_INSTALLER="$SCRIPT_DIR/drivers_utilities/codecs_install.sh"
-if [ -f "$CODECS_INSTALLER" ]; then
-    chmod +x "$CODECS_INSTALLER" 2>/dev/null || true
-    bash "$CODECS_INSTALLER"
-else
-    print_info "Instalador de códecs no encontrado, saltando..."
-fi
-
-# ==============================================================================
-# PASO 3: DETECCIÓN Y CONFIGURACIÓN DE HARDWARE
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 3/13] Detectando hardware e instalando drivers...${NC}"
-
-# 3.1. Instalación de microcódigo de CPU (AMD/Intel)
-CPU_INSTALLER="$SCRIPT_DIR/drivers_utilities/cpu_microcode_install.sh"
-if [ -f "$CPU_INSTALLER" ]; then
-    chmod +x "$CPU_INSTALLER" 2>/dev/null || true
-    bash "$CPU_INSTALLER"
-else
-    print_info "Instalador de microcódigo de CPU no encontrado, saltando..."
-fi
-
-# 3.2. Instalación de drivers de GPU (NVIDIA/AMD/Intel)
-GPU_INSTALLER="$SCRIPT_DIR/drivers_utilities/gpu_drivers_install.sh"
-if [ -f "$GPU_INSTALLER" ]; then
-    chmod +x "$GPU_INSTALLER" 2>/dev/null || true
-    bash "$GPU_INSTALLER"
-else
-    print_info "Instalador de drivers de GPU no encontrado, saltando..."
-fi
-
-# 3.3. Configuración de TRIM
-echo -e "\n${GREEN}[PASO 3/13] Configurando TRIM para SSDs...${NC}"
-
-TRIM_CONFIGURATOR="$SCRIPT_DIR/configure_trim/configure_trim.sh"
-if [ -f "$TRIM_CONFIGURATOR" ]; then
-    chmod +x "$TRIM_CONFIGURATOR" 2>/dev/null || true
-    sudo "$TRIM_CONFIGURATOR"
-else
-    print_info "Configurador de TRIM no encontrado, saltando..."
-fi
-
-# ==============================================================================
-# PASO 4: INSTALACIÓN DE YAY (AUR HELPER)
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 4/13] Instalando Yay (AUR Helper)...${NC}"
-
-if ! command -v yay &> /dev/null; then
-    print_info "Instalando yay..."
-    tmp_dir="$(mktemp -d)"
-    cleanup() { rm -rf "$tmp_dir"; }
-    trap cleanup EXIT
-    git clone https://aur.archlinux.org/yay.git "$tmp_dir/yay"
-    (cd "$tmp_dir/yay" && makepkg -si --noconfirm)
-    trap - EXIT
-    cleanup
-    print_success "Yay instalado correctamente"
-else
-    print_success "Yay ya está instalado, saltando..."
-fi
-
-# ==============================================================================
-# PASO 5: INSTALACIÓN DE PAQUETES DESDE AUR
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 5/13] Instalando paquetes desde AUR...${NC}"
-
-YAY_INSTALLER="$SCRIPT_DIR/yay_install/install_yay_packages.sh"
-if [ -f "$YAY_INSTALLER" ]; then
-    chmod +x "$YAY_INSTALLER" 2>/dev/null || true
-    bash "$YAY_INSTALLER"
-else
-    print_info "No se encontró el instalador de paquetes AUR, saltando..."
-fi
-
-# ==============================================================================
-# PASO 6: INSTALACIÓN DE FUENTES
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 6/13] Instalando fuentes (TTF e iconos)...${NC}"
-pacman_install ttf-font-awesome ttf-jetbrains-mono-nerd noto-fonts-emoji ttf-liberation ttf-dejavu
-
-# ==============================================================================
-# PASO 7: INSTALACIÓN Y CONFIGURACIÓN DE ZSH
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 9/13] Configurando ZSH como shell por defecto...${NC}"
-
-# 8.1. Instalación de ZSH, Oh My Zsh, plugins y Powerlevel10k
-ZSH_INSTALLER="$SCRIPT_DIR/zsh/install_zsh.sh"
-if [ -f "$ZSH_INSTALLER" ]; then
-    chmod +x "$ZSH_INSTALLER" 2>/dev/null || true
-    bash "$ZSH_INSTALLER"
-else
-    print_info "Instalador de ZSH no encontrado, saltando..."
-fi
-
-# 8.2. Cambiar shell por defecto a ZSH
-ZSH_CHANGER="$SCRIPT_DIR/zsh/change_shell.sh"
-if [ -f "$ZSH_CHANGER" ]; then
-    chmod +x "$ZSH_CHANGER" 2>/dev/null || true
-    bash "$ZSH_CHANGER"
-else
-    print_info "Script de cambio de shell no encontrado, saltando..."
-fi
-# ==============================================================================
-# PASO 7.5: INSTALACIÓN Y CONFIGURACIÓN DEL LLAVERO DE CONTRASEÑAS
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 7/13] Configurando llavero de contraseñas (GNOME Keyring)...${NC}"
-
-# 6.5.1. Instalación de GNOME Keyring
-KEYRING_INSTALLER="$SCRIPT_DIR/keyring/install_keyring.sh"
-if [ -f "$KEYRING_INSTALLER" ]; then
-    chmod +x "$KEYRING_INSTALLER" 2>/dev/null || true
-    bash "$KEYRING_INSTALLER"
-else
-    print_info "Instalador de GNOME Keyring no encontrado, saltando..."
-fi
-
-# 6.5.2. Configuración de PAM y autostart
-KEYRING_CONFIGURATOR="$SCRIPT_DIR/keyring/configure_keyring.sh"
-if [ -f "$KEYRING_CONFIGURATOR" ]; then
-    chmod +x "$KEYRING_CONFIGURATOR" 2>/dev/null || true
-    bash "$KEYRING_CONFIGURATOR"
-else
-    print_info "Configurador de GNOME Keyring no encontrado, saltando..."
-fi
-
-# ==============================================================================
-# PASO 8: INSTALACIÓN DE ENTORNO GRÁFICO Y APLICACIONES
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 8/13] Instalando entorno gráfico y aplicaciones...${NC}"
-
-# 7.1. Hyprland
-HYPRLAND_INSTALLER="$SCRIPT_DIR/hyprland/install_hyprland.sh"
-if [ -f "$HYPRLAND_INSTALLER" ]; then
-    chmod +x "$HYPRLAND_INSTALLER" 2>/dev/null || true
-    bash "$HYPRLAND_INSTALLER"
-else
-    print_info "Instalador de Hyprland no encontrado, saltando..."
-fi
-
-# 7.2. Aplicaciones de escritorio (gestor de archivos, visor de imágenes, reproductor de video)
-DESKTOP_APPS_INSTALLER="$SCRIPT_DIR/desktop_apps/install_desktop_apps.sh"
-if [ -f "$DESKTOP_APPS_INSTALLER" ]; then
-    chmod +x "$DESKTOP_APPS_INSTALLER" 2>/dev/null || true
-    bash "$DESKTOP_APPS_INSTALLER"
-else
-    print_info "Instalador de aplicaciones de escritorio no encontrado, saltando..."
-fi
-
-# 7.3. Rofi (lanzador de aplicaciones)
-ROFI_INSTALLER="$SCRIPT_DIR/rofi/install_rofi.sh"
-if [ -f "$ROFI_INSTALLER" ]; then
-    chmod +x "$ROFI_INSTALLER" 2>/dev/null || true
-    bash "$ROFI_INSTALLER"
-else
-    print_info "Instalador de Rofi no encontrado, saltando..."
-fi
-
-# 7.4. Waybar + swaync + wlogout (barra superior y notificaciones)
-WAYBAR_INSTALLER="$SCRIPT_DIR/waybar/install_waybar.sh"
-if [ -f "$WAYBAR_INSTALLER" ]; then
-    chmod +x "$WAYBAR_INSTALLER" 2>/dev/null || true
-    bash "$WAYBAR_INSTALLER"
-else
-    print_info "Instalador de Waybar no encontrado, saltando..."
-fi
-
-# ==============================================================================
-# PASO 9: CONFIGURACIÓN DE HYPRLAND Y ASOCIACIONES MIME
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 10/13] Configurando Hyprland y asociaciones de archivos...${NC}"
-
-# 9.1. Configuración de Hyprland
-HYPRLAND_CONFIGURATOR="$SCRIPT_DIR/hyprland/configure_hyprland.sh"
-if [ -f "$HYPRLAND_CONFIGURATOR" ]; then
-    chmod +x "$HYPRLAND_CONFIGURATOR" 2>/dev/null || true
-    bash "$HYPRLAND_CONFIGURATOR"
-else
-    print_info "Configurador de Hyprland no encontrado, saltando..."
-fi
-
-# ==============================================================================
-# PASO 10: INSTALADORES OPCIONALES
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 11/13] Instaladores opcionales...${NC}"
-
-# 11.1. Configuración de Kitty
-if [ -t 0 ] && [ -t 1 ]; then
-    KITTY_INSTALLER="$SCRIPT_DIR/kitty/install_kitty.sh"
-    if [ -f "$KITTY_INSTALLER" ]; then
-        chmod +x "$KITTY_INSTALLER" 2>/dev/null || true
-        bash "$KITTY_INSTALLER"
-    fi
-fi
-
-
-# 11.3. Instalación de Bun
-if [ -t 0 ] && [ -t 1 ]; then
-    echo -n "¿Deseas instalar Bun (JavaScript runtime) ahora? (s/n, por defecto: n): "
-    read -r install_bun
-    case "$install_bun" in
-        [sS]|[sS][iI])
-            BUN_INSTALLER="$SCRIPT_DIR/bun/install_bun.sh"
-            if [ -f "$BUN_INSTALLER" ]; then
-                chmod +x "$BUN_INSTALLER" 2>/dev/null || true
-                bash "$BUN_INSTALLER"
-            else
-                echo -e "${RED}No se encontró el instalador de Bun en $BUN_INSTALLER${NC}"
-            fi
-            ;;
-        *)
-            ;;
-    esac
-fi
-
-# 11.4. Instalación de DevTools
-if [ -t 0 ] && [ -t 1 ]; then
-    echo -n "¿Deseas instalar DevTools (NVM + JDK25 + Maven) ahora? (s/n, por defecto: n): "
-    read -r install_devtools
-    case "$install_devtools" in
-        [sS]|[sS][iI])
-            DEVTOOLS_INSTALLER="$SCRIPT_DIR/devtools/install_nvm_jdk_maven.sh"
-            if [ -f "$DEVTOOLS_INSTALLER" ]; then
-                chmod +x "$DEVTOOLS_INSTALLER" 2>/dev/null || true
-                # Ejecutar en zsh si está disponible y es el shell por defecto
-                ZSH_BIN="$(command -v zsh 2>/dev/null || true)"
-                if [ -n "$ZSH_BIN" ] && [ "${SHELL:-}" = "$ZSH_BIN" ]; then
-                    zsh "$DEVTOOLS_INSTALLER"
-                else
-                    bash "$DEVTOOLS_INSTALLER"
-                fi
-            else
-                echo -e "${RED}No se encontró el instalador de DevTools en $DEVTOOLS_INSTALLER${NC}"
-            fi
-            ;;
-        *)
-            ;;
-    esac
-fi
-
-# 11.5. Instalación de Yazi
-if [ -t 0 ] && [ -t 1 ]; then
-    echo -n "¿Deseas instalar Yazi (gestor de archivos terminal) ahora? (s/n, por defecto: n): "
-    read -r install_yazi
-    case "$install_yazi" in
-        [sS]|[sS][iI])
-            YAZI_INSTALLER="$SCRIPT_DIR/yazi/install_yazi.sh"
-            if [ -f "$YAZI_INSTALLER" ]; then
-                chmod +x "$YAZI_INSTALLER" 2>/dev/null || true
-                bash "$YAZI_INSTALLER"
-            else
-                echo -e "${RED}No se encontró el instalador de Yazi en $YAZI_INSTALLER${NC}"
-            fi
-            ;;
-        *) ;;
-    esac
-fi
-
-# 11.6. Instalación de Neovim (después de DevTools para soporte de Java)
-if [ -t 0 ] && [ -t 1 ]; then
-    echo -n "¿Deseas instalar Neovim ahora? (s/n, por defecto: n): "
-    read -r install_nvim
-    case "$install_nvim" in
-        [sS]|[sS][iI])
-            NVIM_INSTALLER="$SCRIPT_DIR/nvim/install.sh"
-            if [ -f "$NVIM_INSTALLER" ]; then
-                chmod +x "$NVIM_INSTALLER" 2>/dev/null || true
-                bash "$NVIM_INSTALLER"
-            else
-                echo -e "${RED}No se encontró el instalador de Neovim en $NVIM_INSTALLER${NC}"
-            fi
-            ;;
-        *) ;;
-    esac
-fi
-
-# 11.7. Instalación de Docker
-if [ -t 0 ] && [ -t 1 ]; then
-    echo -n "¿Deseas instalar Docker + Docker Compose ahora? (s/n, por defecto: n): "
-    read -r install_docker
-    case "$install_docker" in
-        [sS]|[sS][iI])
-            DOCKER_INSTALLER="$SCRIPT_DIR/docker/install_docker.sh"
-            if [ -f "$DOCKER_INSTALLER" ]; then
-                chmod +x "$DOCKER_INSTALLER" 2>/dev/null || true
-                bash "$DOCKER_INSTALLER"
-            else
-                echo -e "${RED}No se encontró el instalador de Docker en $DOCKER_INSTALLER${NC}"
-            fi
-            ;;
-        *)
-            ;;
-    esac
-fi
-
-# 11.7. Instalación y configuración de SSH
-if [ -t 0 ] && [ -t 1 ]; then
-    echo -n "¿Deseas instalar y configurar SSH ahora? (s/n, por defecto: s): "
-    read -r install_ssh
-    case "$install_ssh" in
-        [nN]|[nN][oO])
-            ;;
-        *)
-            SSH_INSTALLER="$SCRIPT_DIR/ssh/install_ssh.sh"
-            if [ -f "$SSH_INSTALLER" ]; then
-                chmod +x "$SSH_INSTALLER" 2>/dev/null || true
-                bash "$SSH_INSTALLER"
-            else
-                echo -e "${RED}No se encontró el instalador de SSH en $SSH_INSTALLER${NC}"
-            fi
-            ;;
-    esac
-fi
-
-# ==============================================================================
-# PASO 11: HERRAMIENTAS ADICIONALES
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 12/13] Herramientas adicionales...${NC}"
-
-# 12.1. Instalación de opencode.ai
-if [ -t 0 ] && [ -t 1 ]; then
-    echo -n "¿Deseas instalar opencode.ai (CLI interactiva)? (s/n, por defecto: s): "
-    read -r install_opencode
-    case "$install_opencode" in
-        [nN]|[nN][oO])
-            ;;
-        *)
-            if command -v opencode >/dev/null 2>&1; then
-                print_info "opencode ya está instalado, saltando..."
-            else
-                print_info "Instalando opencode.ai..."
-                curl -fsSL https://opencode.ai/install | bash
-                # Aqui tengo que agregar para agregar la variable de entorno 
-                # PATH=/home/j0k3r/.opencode/bin:$PATH
-                # # Intentar agregar a .bashrc y .zshrc si existen
-                for rc_file in "$HOME/.bashrc" "$HOME/.zshrc"; do
-                    if [ -f "$rc_file" ]; then
-                        # Solo agregar si no existe ya en el archivo
-                        if ! grep -q ".opencode/bin" "$rc_file"; then
-                            echo -e "\n# Opencode.ai path\n$EXPORT_LINE" >> "$rc_file"
-                            print_info "PATH agregado a $rc_file"
-                        fi
-                    fi
-                done
-                print_success "opencode.ai instalado exitosamente"
-            fi
-            ;;
-    esac
-fi
-
-# ==============================================================================
-# PASO 12: FINALIZACIÓN Y DOCUMENTACIÓN
-# ==============================================================================
-echo -e "\n${GREEN}[PASO 13/13] Finalizando instalación...${NC}"
-
-# Instalar comando de actualización del sistema
-UPDATE_CMD_INSTALLER="$SCRIPT_DIR/system_update/install_update_command.sh"
-if [ -f "$UPDATE_CMD_INSTALLER" ]; then
-    print_info "Instalando comando global 'update'..."
-    chmod +x "$UPDATE_CMD_INSTALLER" 2>/dev/null || true
-    bash "$UPDATE_CMD_INSTALLER"
-else
-    print_info "Instalador del comando 'update' no encontrado, saltando..."
-fi
-
-# Copiar archivo de ayuda al directorio home
-if [ -f "$SCRIPT_DIR/COMANDOS.md" ]; then
-    print_info "Copiando guía de comandos al directorio home..."
-    cp "$SCRIPT_DIR/COMANDOS.md" "$HOME/COMANDOS.md"
-    print_success "Guía de comandos disponible en ~/COMANDOS.md"
-fi
-
-echo -e "\n${GREEN}╔════════════════════════════════════════════════════════╗${NC}"
-echo -e   "${GREEN}║          ¡Instalación completada exitosamente!         ║${NC}"
-echo -e   "${GREEN}╚════════════════════════════════════════════════════════╝${NC}"
-echo ""
-echo -e "${GREEN}PRÓXIMOS PASOS:${NC}"
-echo "  1. Cierra la sesión actual y abre una nueva"
-echo "  2. ZSH se cargará automáticamente como tu shell por defecto"
-echo "  3. Powerlevel10k se configurará en la primera ejecución"
-echo ""
-echo -e "${GREEN}COMANDOS ÚTILES:${NC}"
-echo "  • Para ver la guía completa de comandos: ${GREEN}h${NC}"
-echo "  • Para iniciar Hyprland: ${GREEN}start-hyprland${NC}"
-echo ""
-
+ensure_whiptail
+init_categories
+load_selections
+show_welcome
+main_menu_loop

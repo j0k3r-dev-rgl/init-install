@@ -39,7 +39,7 @@ session    optional     pam_gnome_keyring.so auto_start
 
 ### 2. Autostart en Hyprland
 
-El autostart de gnome-keyring está integrado en la configuración modular de Hyprland (`hyprland/conf/autostart.conf`).
+El autostart de gnome-keyring está integrado en la configuración modular de Hyprland (`hyprland/configs/autostart.conf`).
 
 Las líneas añadidas son:
 ```bash
@@ -274,4 +274,3 @@ dbus-send --session --dest=org.freedesktop.secrets \
 - [freedesktop.org Secret Service API](https://www.freedesktop.org/wiki/Specifications/secret-storage-spec/)
 - [GNOME Keyring Project](https://wiki.gnome.org/Projects/GnomeKeyring)
 - [Seahorse Documentation](https://help.gnome.org/users/seahorse/)
-

@@ -1,51 +1,23 @@
 #!/bin/bash
 
-# Script para instalar paquetes desde AUR usando yay
-# Este script debe ejecutarse DESPUÉS de que yay esté instalado
-
 set -euo pipefail
 
-# --- Colores para la salida ---
 GREEN='\033[0;32m'
 RED='\033[0;31m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-print_info() {
-    echo -e "${GREEN}[INFO]${NC} $*"
-}
+print_info() { echo -e "${GREEN}[INFO]${NC} $*"; }
+die() { echo -e "${RED}Error: $*${NC}" >&2; exit 1; }
 
-print_success() {
-    echo -e "${GREEN}[OK]${NC} $*"
-}
-
-die() {
-    echo -e "${RED}Error: $*${NC}" >&2
-    exit 1
-}
-
-# Verificar que yay esté instalado
-if ! command -v yay &> /dev/null; then
-    die "yay no está instalado. Ejecuta primero la instalación de yay desde el script principal."
+if ! command -v yay >/dev/null 2>&1; then
+    print_info "Instalando yay..."
+    tmp_dir="$(mktemp -d)"
+    trap 'rm -rf "$tmp_dir"' EXIT
+    git clone https://aur.archlinux.org/yay.git "$tmp_dir/yay"
+    (cd "$tmp_dir/yay" && makepkg -si --noconfirm)
+    trap - EXIT
+    rm -rf "$tmp_dir"
 fi
 
-print_info "==== Instalación de paquetes desde AUR con yay ===="
-
-# 1. Google Chrome
-if ! command -v google-chrome &> /dev/null; then
-    print_info "Instalando Google Chrome..."
-    yay -S --needed --noconfirm google-chrome
-    print_success "Google Chrome instalado"
-else
-    print_info "Google Chrome ya está instalado, saltando..."
-fi
-
-# 2. OnlyOffice Desktop Editors
-if ! command -v onlyoffice-desktopeditors &> /dev/null; then
-    print_info "Instalando OnlyOffice Desktop Editors..."
-    yay -S --needed --noconfirm onlyoffice-bin
-    print_success "OnlyOffice Desktop Editors instalado"
-else
-    print_info "OnlyOffice ya está instalado, saltando..."
-fi
-
-print_success "==== Instalación de paquetes AUR completada ===="
+print_info "Instalando paquetes AUR requeridos..."
+yay -S --needed --noconfirm google-chrome wlogout

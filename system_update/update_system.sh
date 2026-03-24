@@ -29,15 +29,8 @@ if command -v yay >/dev/null 2>&1; then
     yay -Sua --noconfirm
 fi
 
-# 3. MONGODB COMPASS
-if command -v mongodb-compass-update >/dev/null 2>&1; then
-    print_header "3. MONGODB COMPASS"
-    # Lógica simplificada de verificación
-    print_success "Verificación completada"
-fi
-
-# 4. LIMPIEZA PROFUNDA
-print_header "4. LIMPIEZA DEL SISTEMA"
+# 3. LIMPIEZA PROFUNDA
+print_header "3. LIMPIEZA DEL SISTEMA"
 
 # Huérfanos
 ORPHANS=$(pacman -Qdtq) || true
@@ -67,7 +60,7 @@ if [[ $REPLY =~ ^[SsYy]$ ]]; then
     print_success "Limpieza total completada."
 fi
 
-print_header "5. ESTADO DEL KERNEL"
+print_header "4. ESTADO DEL KERNEL"
 
 KERNEL_PKG=$(pacman -Q linux 2>/dev/null || pacman -Q linux-lts 2>/dev/null | cut -d' ' -f2 | cut -d'-' -f1) || KERNEL_PKG=""
 KERNEL_RUNNING=$(uname -r | cut -d'-' -f1)

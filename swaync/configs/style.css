@@ -1,0 +1,308 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   swaync - GitHub Dark Theme (usa colores compartidos de waybar)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@import "$HOME/.config/waybar/colors.css";
+
+* {
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 13px;
+    border: none;
+    border-radius: 0;
+    transition: all 0.15s ease;
+}
+
+/* ─── Panel principal ────────────────────────────────────────────────────── */
+
+.control-center {
+    background-image:
+        linear-gradient(
+            to bottom,
+            alpha(@bg, 0.15) 0%,
+            alpha(@bg, 0.75) 130px,
+            @bg             190px
+        ),
+        url("$HOME/wallpapers/profile.png");
+    background-color: @bg;
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    border: 1px solid @border;
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 8px 32px alpha(black, 0.6);
+}
+
+/* ─── Nombre de usuario ──────────────────────────────────────────────────── */
+
+#username {
+    margin: 120px 4px 10px 4px;
+}
+
+#username label {
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+/* ─── Widget title ───────────────────────────────────────────────────────── */
+
+.widget-title {
+    color: @text-muted;
+    font-size: 12px;
+    font-weight: bold;
+    margin: 4px 0;
+}
+
+.widget-title > button {
+    color: @blue;
+    background: transparent;
+    font-size: 12px;
+    border-radius: 6px;
+    padding: 2px 8px;
+}
+
+.widget-title > button:hover {
+    background: @surface2;
+}
+
+/* ─── DND toggle ─────────────────────────────────────────────────────────── */
+
+.widget-dnd {
+    background: @surface;
+    border: 1px solid @border;
+    border-radius: 12px;
+    padding: 8px 14px;
+    margin: 4px 0;
+    color: @text;
+    font-size: 13px;
+}
+
+.widget-dnd > switch {
+    border-radius: 12px;
+    background: @surface2;
+    border: 1px solid @border;
+}
+
+.widget-dnd > switch:checked {
+    background: @blue;
+    border-color: @blue;
+}
+
+.widget-dnd > switch slider {
+    background: @text;
+    border-radius: 10px;
+    min-width: 20px;
+    min-height: 20px;
+}
+
+/* ─── Buttons grid ───────────────────────────────────────────────────────── */
+
+.widget-buttons-grid {
+    margin: 4px 0;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button {
+    background: @surface;
+    border: 1px solid @border;
+    border-radius: 10px;
+    color: @text-muted;
+    padding: 10px 14px;
+    margin: 3px;
+    font-size: 12px;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button:hover {
+    background: @surface2;
+    border-color: @blue;
+    color: @cyan;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button.active {
+    background: alpha(@blue, 0.15);
+    border-color: @blue;
+    color: @blue;
+}
+
+/* ─── Volume widget ──────────────────────────────────────────────────────── */
+
+.widget-volume {
+    background: @surface;
+    border: 1px solid @border;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin: 4px 0;
+    color: @text;
+}
+
+.widget-volume > box > label {
+    color: @cyan;
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.widget-volume scale {
+    color: @blue;
+    margin: 4px 0;
+}
+
+.widget-volume scale trough {
+    background: @surface2;
+    border-radius: 6px;
+    min-height: 6px;
+}
+
+.widget-volume scale highlight {
+    background: linear-gradient(to right, @blue, @cyan);
+    border-radius: 6px;
+}
+
+.widget-volume scale slider {
+    background: @cyan;
+    border-radius: 50%;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+/* Per-app volume */
+.per-app-volume {
+    background: @surface2;
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin: 3px 0;
+}
+
+.per-app-volume label {
+    color: @text-muted;
+    font-size: 12px;
+}
+
+/* ─── Notificaciones ─────────────────────────────────────────────────────── */
+
+.notification-row {
+    margin: 4px 0;
+}
+
+.notification {
+    background: @surface;
+    border: 1px solid @border;
+    border-radius: 12px;
+    padding: 12px;
+    margin: 3px 0;
+    color: @text;
+}
+
+.notification:hover {
+    background: #1c2128;
+    border-color: @blue;
+}
+
+.notification.low {
+    border-left: 3px solid @green;
+}
+
+.notification.normal {
+    border-left: 3px solid @blue;
+}
+
+.notification.critical {
+    border-left: 3px solid @red;
+    background: alpha(@red, 0.05);
+}
+
+.notification-default-action {
+    background: transparent;
+    border-radius: 10px;
+    padding: 0;
+    margin: 0;
+    color: @text;
+}
+
+.notification-action {
+    background: @surface2;
+    border: 1px solid @border;
+    border-radius: 8px;
+    color: @blue;
+    padding: 4px 10px;
+    margin: 2px;
+    font-size: 12px;
+}
+
+.notification-action:hover {
+    background: @border;
+}
+
+.close-button {
+    background: @surface2;
+    color: @text-muted;
+    border-radius: 50%;
+    min-width: 22px;
+    min-height: 22px;
+    padding: 0;
+    font-size: 12px;
+}
+
+.close-button:hover {
+    background: alpha(@red, 0.2);
+    color: @red;
+}
+
+.summary {
+    font-weight: bold;
+    color: @text;
+    font-size: 13px;
+}
+
+.time {
+    color: @text-muted;
+    font-size: 11px;
+}
+
+.body {
+    color: @text-muted;
+    font-size: 12px;
+}
+
+/* ─── Estado vacío ───────────────────────────────────────────────────────── */
+
+.blank-window {
+    background: transparent;
+}
+
+.widget-notifications {
+    background: transparent;
+    padding: 0;
+}
+
+.empty-state-icon {
+    color: @border;
+    font-size: 48px;
+}
+
+.empty-state-text {
+    color: @border;
+    font-size: 13px;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+
+scrollbar slider {
+    background: @border;
+    border-radius: 8px;
+    min-width: 4px;
+}
+
+scrollbar slider:hover {
+    background: @blue;
+}
+
+/* ─── Popup flotante ─────────────────────────────────────────────────────── */
+
+.floating-notifications {
+    background: transparent;
+}
+
+.floating-notifications > .notification-row > .notification {
+    box-shadow: 0 4px 16px alpha(black, 0.5);
+}

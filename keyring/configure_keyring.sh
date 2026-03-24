@@ -99,7 +99,7 @@ EOF
 fi
 
 # NOTA: La inclusión de autostart.conf en hyprland.conf ya está gestionada
-# por la configuración base en hyprland/conf/hyprland.conf
+# por la configuración base en hyprland/configs/hyprland.conf
 
 # ==============================================================================
 # 3. CONFIGURACIÓN DE SSH AGENT (GCR-SSH-AGENT)
