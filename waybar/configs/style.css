@@ -159,6 +159,19 @@ window > box > .modules-center {
     /* Asegura que el centro este bien centrado */
 }
 
+/* ─── Reloj ──────────────────────────────────────────────────────────────── */
+
+#clock {
+    color: @text;
+    padding: 4px 10px;
+    border-radius: 8px;
+    margin: 4px 1px;
+}
+
+#clock:hover {
+    background: @surface2;
+}
+
 /* ─── Volumen ────────────────────────────────────────────────────────────── */
 
 #pulseaudio {
@@ -171,6 +184,19 @@ window > box > .modules-center {
 
 #pulseaudio.muted {
     color: @text-muted;
+}
+
+/* ─── Idioma ─────────────────────────────────────────────────────────────── */
+
+#language {
+    color: @orange;
+    padding: 4px 10px;
+    border-radius: 8px;
+    margin: 4px 1px;
+}
+
+#language:hover {
+    background: @surface2;
 }
 
 /* ─── Selector de tema ───────────────────────────────────────────────────── */
