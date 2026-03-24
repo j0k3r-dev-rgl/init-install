@@ -410,6 +410,34 @@ Acciones:
         (str(SCRIPT_DIR / "claude_code" / "install_claude_code.sh"),),
     ),
     Category(
+        "codex",
+        "Codex",
+        "Instala Codex CLI via Homebrew",
+        """Dependencias:
+- Homebrew (debe estar instalado)
+
+Acciones:
+- verifica si codex ya está instalado
+- ejecuta brew install codex""",
+        (str(SCRIPT_DIR / "codex" / "install_codex.sh"),),
+    ),
+    Category(
+        "intellij",
+        "IntelliJ IDEA",
+        "Instala IntelliJ IDEA Ultimate desde la API oficial de JetBrains",
+        """Dependencias:
+- jq
+- curl
+- tar
+
+Acciones:
+- consulta la última versión desde la API de JetBrains
+- descarga e instala en /opt/intellij
+- crea symlink idea en /usr/local/bin
+- crea intellij-idea.desktop en ~/.local/share/applications""",
+        (str(SCRIPT_DIR / "intellij" / "install_intellij.sh"),),
+    ),
+    Category(
         "post_install",
         "Post instalación",
         "Copia MIME, instala el comando update y deja la guía final",

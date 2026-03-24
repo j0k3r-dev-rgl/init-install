@@ -31,6 +31,12 @@ if [ -f "$SCRIPT_DIR/../mongodb_compass/update_compass.sh" ]; then
     chmod +x "$BIN_DIR/update_compass.sh"
 fi
 
+# Also copy the IntelliJ IDEA updater
+if [ -f "$SCRIPT_DIR/../intellij/update_intellij.sh" ]; then
+    cp "$SCRIPT_DIR/../intellij/update_intellij.sh" "$BIN_DIR/intellij-update"
+    chmod +x "$BIN_DIR/intellij-update"
+fi
+
 # Verificar que .local/bin está en PATH
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
     print_info "Añadiendo $BIN_DIR al PATH en .zshrc..."
@@ -50,4 +56,5 @@ print_info ""
 print_info "Este comando actualizará:"
 print_info "  • Paquetes oficiales (pacman)"
 print_info "  • Paquetes AUR (yay)"
+print_info "  • IntelliJ IDEA (intellij-update)"
 print_info "  • Limpieza opcional del sistema"

@@ -23,6 +23,8 @@ Scripts modulares de bash para dejar un sistema Arch Linux alineado con el setup
 15. `keyring/*`
 16. `mongodb_compass/install_compass.sh`
 17. `opencode/install_opencode.sh`
+18. `codex/install_codex.sh`
+19. `intellij/install_intellij.sh`
 
 ## Convenciones
 
@@ -32,3 +34,5 @@ Scripts modulares de bash para dejar un sistema Arch Linux alineado con el setup
 - La detección automática de CPU/GPU se mantiene
 - MongoDB Compass se instala desde el binario oficial
 - MongoDB Compass se mantiene como herramienta gráfica de MongoDB
+- IntelliJ IDEA se instala desde la API oficial de JetBrains (última versión)
+- Codex se instala via Homebrew (`brew install codex`)

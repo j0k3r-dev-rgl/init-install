@@ -31,7 +31,7 @@ Las selecciones se guardan en:
 
 1. system_base
 2. homebrew
-3. yay + AUR
+3. yay_install
 4. drivers_utilities
 5. hyprland
 6. waybar
@@ -45,9 +45,21 @@ Las selecciones se guardan en:
 14. system_essentials
 15. zsh
 16. keyring
-17. mongodb_compass
-18. opencode
-19. post_install
+17. keepassxc
+18. mongodb_compass
+19. opencode
+20. claude_code
+21. codex
+22. intellij
+23. post_install
+
+## Comandos de actualización
+
+Después de la instalación, estos comandos están disponibles en `~/.local/bin/`:
+
+- `update` — Actualiza todo el sistema (pacman, yay, y más)
+- `update_compass` — Actualiza MongoDB Compass
+- `intellij-update` — Actualiza IntelliJ IDEA a la última versión
 
 ## Notas
 
@@ -55,5 +67,7 @@ Las selecciones se guardan en:
 - El progreso de la instalación se muestra con una barra `gauge`
 - Las configuraciones del repo viven en `configs/`
 - Las copias al `$HOME` se hacen en modo no destructivo
-- MongoDB Compass se instala desde el binario oficial
+- MongoDB Compass se instala desde el binario oficial y usa GNOME Keyring para guardar contraseñas
+- IntelliJ IDEA se instala desde la API oficial de JetBrains
+- Codex se instala via Homebrew (`brew install codex`)
 - El proyecto replica el setup actual del usuario sin herramientas de MongoDB por CLI
