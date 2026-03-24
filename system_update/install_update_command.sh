@@ -25,6 +25,12 @@ mkdir -p "$BIN_DIR"
 cp "$UPDATE_SCRIPT" "$BIN_DIR/$COMMAND_NAME"
 chmod +x "$BIN_DIR/$COMMAND_NAME"
 
+# Also copy the mongodb compass updater
+if [ -f "$SCRIPT_DIR/../mongodb_compass/update_compass.sh" ]; then
+    cp "$SCRIPT_DIR/../mongodb_compass/update_compass.sh" "$BIN_DIR/"
+    chmod +x "$BIN_DIR/update_compass.sh"
+fi
+
 # Verificar que .local/bin está en PATH
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
     print_info "Añadiendo $BIN_DIR al PATH en .zshrc..."

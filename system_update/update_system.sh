@@ -2,6 +2,14 @@
 
 set -euo pipefail
 
+# Resolve the real path even when called via symlink
+SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE" ]; do
+    SOURCE="$(readlink -f "$SOURCE")"
+done
+SCRIPT_DIR="$(cd -- "$(dirname -- "$SOURCE")" && pwd)"
+BIN_DIR="$HOME/.local/bin"
+
 # Colores
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -29,8 +37,30 @@ if command -v yay >/dev/null 2>&1; then
     yay -Sua --noconfirm
 fi
 
-# 3. LIMPIEZA PROFUNDA
-print_header "3. LIMPIEZA DEL SISTEMA"
+# 3. HOMEBREW
+if command -v brew >/dev/null 2>&1; then
+    print_header "3. HOMEBREW"
+    print_info "Actualizando Homebrew..."
+    brew update
+    brew upgrade
+fi
+
+# 4. OPENCODE
+if command -v opencode >/dev/null 2>&1; then
+    print_header "4. OPENCODE"
+    print_info "Actualizando Opencode..."
+    curl -fsSL https://opencode.ai/install | bash
+fi
+
+# 5. MONGODB COMPASS
+if [ -f /opt/mongo/mongoDBCompass/.version ]; then
+    print_header "5. MONGODB COMPASS"
+    print_info "Verificando MongoDB Compass..."
+    bash "$BIN_DIR/update_compass.sh"
+fi
+
+# 6. LIMPIEZA PROFUNDA
+print_header "6. LIMPIEZA DEL SISTEMA"
 
 # Huérfanos
 ORPHANS=$(pacman -Qdtq) || true
@@ -60,7 +90,7 @@ if [[ $REPLY =~ ^[SsYy]$ ]]; then
     print_success "Limpieza total completada."
 fi
 
-print_header "4. ESTADO DEL KERNEL"
+print_header "7. ESTADO DEL KERNEL"
 
 KERNEL_PKG=$(pacman -Q linux 2>/dev/null || pacman -Q linux-lts 2>/dev/null | cut -d' ' -f2 | cut -d'-' -f1) || KERNEL_PKG=""
 KERNEL_RUNNING=$(uname -r | cut -d'-' -f1)

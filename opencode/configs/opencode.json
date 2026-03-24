@@ -3,7 +3,7 @@
   "mcp": {
     "engram": {
       "command": [
-        "/home/linuxbrew/.linuxbrew/Cellar/engram/1.10.4/bin/engram",
+        "engram",
         "mcp",
         "--tools=agent"
       ],
