@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import curses
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -9,6 +10,12 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
+
+_ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def strip_ansi(text: str) -> str:
+    return _ANSI_ESCAPE.sub("", text)
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -55,7 +62,7 @@ def run_post_install_actions() -> list[str]:
         )
         output = (result.stdout or "") + (result.stderr or "")
         if output.strip():
-            messages.extend(output.strip().splitlines())
+            messages.extend(strip_ansi(line) for line in output.strip().splitlines())
         if result.returncode != 0:
             raise subprocess.CalledProcessError(result.returncode, result.args, output=output)
 
@@ -629,7 +636,7 @@ class InstallerApp:
 
         assert process.stdout is not None
         for line in iter(process.stdout.readline, ""):
-            logs.append(line.rstrip())
+            logs.append(strip_ansi(line.rstrip()))
             self.draw_install_screen(current, total, category_title, logs)
         process.stdout.close()
         return_code = process.wait()
