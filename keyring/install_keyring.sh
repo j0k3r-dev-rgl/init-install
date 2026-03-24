@@ -12,6 +12,19 @@ NC='\033[0m'
 
 KEEPASSXC_DIR="$HOME/.config/keepassxc"
 KEEPASSXC_BACKUP_DIR="$HOME/.local/share/keyrings/keepassxc-backup"
+HYPR_CONFIG="$HOME/.config/hypr"
+
+# Detectar ruta de configs - puede ser ~/.config/hypr/ o ~/.config/hypr/configs/
+if [ -f "$HYPR_CONFIG/environment.conf" ]; then
+    ENV_FILE="$HYPR_CONFIG/environment.conf"
+    AUTOSTART_FILE="$HYPR_CONFIG/autostart.conf"
+elif [ -f "$HYPR_CONFIG/configs/environment.conf" ]; then
+    ENV_FILE="$HYPR_CONFIG/configs/environment.conf"
+    AUTOSTART_FILE="$HYPR_CONFIG/configs/autostart.conf"
+else
+    ENV_FILE=""
+    AUTOSTART_FILE=""
+fi
 
 print_info() {
     echo -e "${GREEN}[KEYRING]${NC} $*"
@@ -60,6 +73,53 @@ install_gnome_keyring_stack() {
     sudo pacman -S --needed --noconfirm gcr-4 >/dev/null || die "No se pudo instalar gcr-4"
 }
 
+configure_hyprland_keyring() {
+    if [ -z "$ENV_FILE" ] || [ ! -f "$ENV_FILE" ]; then
+        print_info "Hyprland no detectado, saltando configuración de entorno"
+        return
+    fi
+
+    print_info "Configurando GNOME Keyring en Hyprland..."
+
+    # Configurar environment.conf si existe
+    if [ -f "$ENV_FILE" ]; then
+        if ! grep -q 'GNOME_KEYRING_CONTROL' "$ENV_FILE"; then
+            print_info "Agregando variables de entorno de GNOME Keyring..."
+            cat >> "$ENV_FILE" <<'EOF'
+
+# GNOME Keyring
+env = GNOME_KEYRING_CONTROL,/run/user/1000/keyring
+EOF
+        fi
+    fi
+
+    # Configurar autostart.conf si existe
+    if [ -f "$AUTOSTART_FILE" ]; then
+        if ! grep -q 'gnome-keyring-daemon --start' "$AUTOSTART_FILE"; then
+            print_info "Agregando gnome-keyring-daemon al autostart..."
+            cat >> "$AUTOSTART_FILE" <<'EOF'
+
+# GNOME Keyring Daemon
+exec-once = dbus-update-activation-environment --all
+exec-once = gnome-keyring-daemon --start --components=secrets
+EOF
+        fi
+    fi
+
+    print_info "Entorno de GNOME Keyring configurado para Hyprland"
+}
+
+enable_ssh_agent() {
+    print_info "Habilitando SSH Agent de GNOME Keyring..."
+
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl --user enable --now gcr-ssh-agent.socket 2>/dev/null || print_warning "No se pudo habilitar gcr-ssh-agent.socket"
+        print_info "SSH Agent habilitado"
+    else
+        print_warning "systemctl no disponible,SSH Agent deberá iniciarse manualmente"
+    fi
+}
+
 print_restore_summary() {
     echo ""
     echo "=========================================="
@@ -78,8 +138,13 @@ main() {
     backup_keepassxc_data
     uninstall_keepassxc
     install_gnome_keyring_stack
+    configure_hyprland_keyring
+    enable_ssh_agent
 
-    print_info "GNOME Keyring instalado correctamente"
+    print_info ""
+    print_info "=========================================="
+    print_info "INSTALACIÓN COMPLETA"
+    print_info "=========================================="
     print_info ""
     print_info "Componentes instalados:"
     print_info "  • gnome-keyring: Servicio de llavero de contraseñas"
@@ -87,8 +152,12 @@ main() {
     print_info "  • seahorse: Interfaz gráfica para gestionar contraseñas"
     print_info "  • gcr-4: Soporte para SSH agent"
     print_info ""
+    print_info "Configuración realizada:"
+    print_info "  • Variables de entorno en Hyprland (si estaba instalado)"
+    print_info "  • Autostart del daemon de GNOME Keyring"
+    print_info "  • SSH Agent habilitado"
+    print_info ""
     print_warning "Si tenías contraseñas en KeePassXC, importalas manualmente desde el backup"
-    print_info "La configuración PAM y autostart se realizará en el siguiente paso"
     print_restore_summary
 }
 

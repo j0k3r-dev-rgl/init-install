@@ -43,7 +43,7 @@ cat > "$DESKTOP_FILE" <<EOF
 [Desktop Entry]
 Name=MongoDB Compass
 Comment=The GUI for MongoDB
-Exec=$INSTALL_DIR/MongoDB Compass
+Exec=env ELECTRON_OZONE_PLATFORM_HINT=auto "$INSTALL_DIR/MongoDB Compass" --ignore-additional-command-line-flags --password-store=gnome-libsecret
 Icon=$INSTALL_DIR/resources/app/node_modules/@mongodb-js/compass/dist/main.png
 Terminal=false
 Type=Application

@@ -75,8 +75,8 @@ uninstall_gnome_keyring_stack() {
 }
 
 install_keepassxc_stack() {
-    print_info "Instalando KeePassXC y libsecret..."
-    sudo pacman -S --needed --noconfirm keepassxc libsecret >/dev/null || die "No se pudo instalar KeePassXC"
+    print_info "Instalando KeePassXC, libsecret y qt5-wayland..."
+    sudo pacman -S --needed --noconfirm keepassxc libsecret qt5-wayland >/dev/null || die "No se pudo instalar KeePassXC"
 }
 
 migrate_passwords_to_keepassxc() {
