@@ -136,13 +136,13 @@ return {
           git_placement = "after",
           glyphs = {
             git = {
-              unstaged  = "✎",
-              staged    = "✓",
-              unmerged  = "",
-              renamed   = "➜",
-              untracked = "",
-              deleted   = "",
-              ignored   = "◌",
+              unstaged  = "",   -- lápiz (Nerd Font)
+              staged    = "",   -- check
+              unmerged  = "",   -- merge
+              renamed   = "",   -- flecha
+              untracked = "",   -- signo más
+              deleted   = "",   -- basura
+              ignored   = "",   -- círculo prohibido
             },
           },
         },

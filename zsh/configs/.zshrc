@@ -161,6 +161,8 @@ fi
 # GNOME Keyring SSH Agent
 export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/gcr/ssh"
 
+export ENGRAM_DATA_DIR=$HOME/sias/app/.engram
+
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
@@ -168,3 +170,5 @@ export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/gcr/ssh"
 export PATH=$HOME/.opencode/bin:$PATH
 export PATH=$PATH:/opt/nvim-linux-x86_64/bin
 export PATH=$PATH:/home/linuxbrew/.linuxbrew/Cellar/engram/1.10.4/bin
+export PATH=$PATH:$HOME/.linuxbrew/bin
+
