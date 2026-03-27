@@ -32,4 +32,27 @@ if [ ! -t 0 ]; then
     exit 1
 fi
 
+# Verificar que zsh esté instalado y sea el shell activo
+if ! command -v zsh >/dev/null 2>&1 || [ "${SHELL:-}" != "$(command -v zsh)" ]; then
+    echo ""
+    echo "  AVISO: Zsh no está configurado como shell por defecto."
+    echo "  El instalador principal requiere que zsh esté activo."
+    echo ""
+    echo -n "  ¿Ejecutar pre_install.sh para configurarlo ahora? (S/n): "
+    read -r resp
+    resp="${resp:-s}"
+    case "${resp,,}" in
+        s|si|yes|y)
+            exec bash "$SCRIPT_DIR/pre_install.sh"
+            ;;
+        *)
+            echo ""
+            echo "  Puedes ejecutarlo manualmente cuando quieras:"
+            echo "    bash $SCRIPT_DIR/pre_install.sh"
+            echo ""
+            exit 0
+            ;;
+    esac
+fi
+
 exec python3 "$SCRIPT_DIR/install.py" "$@"

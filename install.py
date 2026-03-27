@@ -328,24 +328,6 @@ Extra:
         (str(SCRIPT_DIR / "system_essentials" / "install_essentials.sh"),),
     ),
     Category(
-        "zsh",
-        "ZSH",
-        "Instala ZSH, Oh My Zsh y plugins",
-        """Paquetes:
-- zsh
-- fzf
-- eza
-
-Acciones:
-- instala Oh My Zsh
-- clona zsh-autosuggestions
-- clona zsh-syntax-highlighting
-- clona powerlevel10k
-- copia .zshrc si no existe
-- cambia el shell por defecto a zsh si aplica""",
-        (str(SCRIPT_DIR / "zsh" / "install_zsh.sh"),),
-    ),
-    Category(
         "keyring",
         "GNOME Keyring",
         "Instala y configura GNOME Keyring para login, Hyprland y SSH",
