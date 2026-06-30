@@ -1,6 +1,6 @@
 # init-install
 
-Scripts bash modulares para replicar el sistema real del usuario sobre Arch Linux.
+Scripts bash/Python modulares para replicar y mantener el setup real del usuario sobre Arch Linux.
 
 ## Uso
 
@@ -8,18 +8,18 @@ Scripts bash modulares para replicar el sistema real del usuario sobre Arch Linu
 ./install.sh
 ```
 
-`install.sh` abre un menú interactivo con `whiptail` para seleccionar qué categorías instalar.
+`install.sh` valida Arch/Python/TTY y abre `install.py`, un menú interactivo en `curses`, usable desde TTY.
 
-## Menú interactivo
+## Menú principal
 
-- Checklist principal con categorías instalables
-- Botón **Instalar** para ejecutar la selección actual
-- Botón **Opciones** con acciones extra:
-  - **Install all**
-  - **Select all**
-  - **Deselect all**
-  - **Ver paquetes** por categoría
-- Botón **Salir** para cerrar sin instalar
+El instalador está seccionado para no tener que recorrer todo cuando solo quieres hacer una tarea puntual:
+
+1. **Install base**
+2. **Install desktop / bar**
+3. **Install software**
+4. **Import configs**
+5. **Export configs**
+6. **Exit**
 
 Las selecciones se guardan en:
 
@@ -27,47 +27,107 @@ Las selecciones se guardan en:
 ~/.init-install.conf
 ```
 
-## Categorías incluidas
+## Secciones
 
-1. system_base
-2. homebrew
-3. yay_install
-4. drivers_utilities
-5. hyprland
-6. waybar
-7. swaync
-8. wlogout
-9. rofi
-10. kitty
-11. nvim
-12. yazi
-13. docker
-14. system_essentials
-15. zsh
-16. keyring
-17. keepassxc
-18. mongodb_compass
-19. opencode
-20. claude_code
-21. codex
-22. intellij
-23. post_install
+### Install base
+
+Instala la base mínima y drivers:
+
+- sistema base
+- yay como helper AUR
+- red
+- audio PipeWire
+- códecs
+- microcódigo CPU
+- drivers GPU detectados
+- TRIM
+- post-install mínimo (`mimeapps`, comando `update`, guía `COMANDOS.md`)
+
+### Install desktop / bar
+
+Permite elegir componentes de escritorio/barra:
+
+- Hyprland
+- MangoWM
+- Waybar
+- Noctalia Shell
+- swaync
+- wlogout
+- Rofi
+- Kitty
+- GNOME Keyring o KeePassXC
+
+### Install software
+
+Lista programas de uso común y solo instala lo seleccionado. Incluye navegadores, dev tools, terminal tools, multimedia, fuentes, Docker, Neovim, Yazi, MongoDB Compass, Opencode, Claude Code, Codex, IntelliJ, SSH y Zsh setup.
+
+### Import configs
+
+Copia configs desde el repo hacia `~/.config`.
+
+Reglas:
+
+- compara antes de copiar
+- si es igual, omite
+- si no existe destino, copia sin backup
+- si existe destino y es diferente, pide confirmación
+- antes de actualizar algo diferente, crea backup en:
+
+```bash
+~/.config_backups/init-install/<timestamp>/<target>/
+```
+
+- copia solo archivos nuevos/modificados desde el repo
+- conserva archivos extra que existan solo en el destino local
+- no muestra contenidos de archivos en la confirmación
+
+### Export configs
+
+Copia configs desde este sistema hacia el repo usando la misma lógica de comparación/confirmación.
+
+Backups de configs del repo reemplazadas se guardan en:
+
+```bash
+.config_backups/exports/<timestamp>/<target>/
+```
+
+Se ignoran carpetas ruidosas o peligrosas durante sync, como `.git`, `node_modules`, `__pycache__` y `.cache`.
+
+> Aviso: `Export configs` no inspecciona el contenido de archivos. Revisa la selección antes de exportar para no copiar datos privados al repo.
+
+## Configs incluidas
+
+- Hyprland: `hyprland/configs/`
+- MangoWM: `mango/configs/`
+- Noctalia Shell: `noctalia/configs/`
+- Waybar: `waybar/configs/`
+- Kitty: `kitty/configs/`
+- Rofi: `rofi/configs/`
+- swaync: `swaync/configs/`
+- wlogout: `wlogout/configs/`
+- Neovim: `nvim/configs/`
+- Yazi: `yazi/configs/`
+- Opencode: `opencode/configs/`
 
 ## Comandos de actualización
 
-Después de la instalación, estos comandos están disponibles en `~/.local/bin/`:
+Después de la instalación, estos comandos pueden quedar disponibles en `~/.local/bin/`:
 
-- `update` — Actualiza todo el sistema (pacman, yay, y más)
-- `update_compass` — Actualiza MongoDB Compass
-- `intellij-update` — Actualiza IntelliJ IDEA a la última versión
+- `update` — actualiza sistema, AUR, Homebrew y herramientas soportadas
+- `update_compass` — actualiza MongoDB Compass
+- `intellij-update` — actualiza IntelliJ IDEA a la última versión
+
+## Validación de desarrollo
+
+```bash
+python -m unittest discover -s tests
+python -m py_compile install.py installer_lib/*.py
+bash -n $(find . -name "*.sh" -not -path "./.git/*")
+```
 
 ## Notas
 
-- Si `whiptail` no está disponible, el instalador intenta instalarlo automáticamente con `pacman` (`libnewt` en Arch)
-- El progreso de la instalación se muestra con una barra `gauge`
-- Las configuraciones del repo viven en `configs/`
-- Las copias al `$HOME` se hacen en modo no destructivo
-- MongoDB Compass se instala desde el binario oficial y usa GNOME Keyring para guardar contraseñas
-- IntelliJ IDEA se instala desde la API oficial de JetBrains
-- Codex se instala via Homebrew (`brew install codex`)
-- El proyecto replica el setup actual del usuario sin herramientas de MongoDB por CLI
+- Las copias de configs son conservadoras y confirman antes de actualizar diferencias.
+- MongoDB Compass se instala desde el binario oficial y usa GNOME Keyring/libsecret para guardar contraseñas.
+- IntelliJ IDEA se instala desde la API oficial de JetBrains.
+- Codex se instala vía Homebrew (`brew install codex`).

@@ -25,7 +25,4 @@ sudo pacman -S --needed --noconfirm \
     python-gobject \
     zoxide
 
-if command -v yay >/dev/null 2>&1; then
-    print_info "Asegurando wlogout desde AUR..."
-    yay -S --needed --noconfirm wlogout
-fi
+print_info "Utilidades esenciales listas. wlogout se elige desde Desktop/Bar."

@@ -17,7 +17,8 @@ if ! command -v yay >/dev/null 2>&1; then
     (cd "$tmp_dir/yay" && makepkg -si --noconfirm)
     trap - EXIT
     rm -rf "$tmp_dir"
+else
+    print_info "yay ya está instalado"
 fi
 
-print_info "Instalando paquetes AUR requeridos..."
-yay -S --needed --noconfirm google-chrome wlogout
+print_info "Yay listo. Los paquetes AUR se eligen desde Desktop/Software."
