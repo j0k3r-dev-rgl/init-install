@@ -14,7 +14,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable, Iterable
 
-from installer_lib.config_sync import DEFAULT_CONFIG_TARGETS, apply_sync_plan, compare_paths, SyncPlan
+from installer_lib.config_sync import DEFAULT_CONFIG_TARGETS, apply_sync_plan, evaluate_config_target, SyncPlan
 
 _ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*m")
 
@@ -541,16 +541,27 @@ class InstallerApp:
                     "Si una config del repo difiere, se creará backup antes de actualizarla.",
                 ],
             )
+        states = [evaluate_config_target(target, direction, SCRIPT_DIR, Path.home()) for target in DEFAULT_CONFIG_TARGETS]
         categories = tuple(
             Category(
-                f"config_{direction}_{target.key}",
-                target.title,
-                f"{target.repo_relative} {'->' if direction == 'import' else '<-'} {target.home_relative}",
-                f"Repo: {target.repo_relative}\nHome: {target.home_relative}",
+                f"config_{direction}_{state.target.key}",
+                state.target.title,
+                state.summary,
+                (
+                    f"Repo: {state.target.repo_relative}\n"
+                    f"Home: {state.target.home_relative}\n"
+                    f"Comandos: {', '.join(state.target.commands) if state.target.commands else 'n/a'}\n"
+                    f"Estado: {state.summary}\n"
+                    f"Fuente: {state.plan.source}\n"
+                    f"Destino: {state.plan.destination}"
+                ),
             )
-            for target in DEFAULT_CONFIG_TARGETS
+            for state in states
         )
-        selected_items = self.choose_categories(categories, title, default_selected=True)
+        for state in states:
+            self.selections[f"config_{direction}_{state.target.key}"] = state.default_selected
+        self.save_selections()
+        selected_items = self.choose_categories(categories, title, default_selected=False)
         if not selected_items:
             return
         selected_keys = {item.key.removeprefix(f"config_{direction}_") for item in selected_items}
@@ -563,14 +574,9 @@ class InstallerApp:
         logs: list[str] = []
         total = len(targets)
         for index, target in enumerate(targets, start=1):
-            if direction == "import":
-                source = target.repo_path(SCRIPT_DIR)
-                destination = target.home_path(Path.home())
-            else:
-                source = target.home_path(Path.home())
-                destination = target.repo_path(SCRIPT_DIR)
-            plan = compare_paths(target.key, source, destination)
-            logs.append(f"[{target.title}] {plan.summary}")
+            state = evaluate_config_target(target, direction, SCRIPT_DIR, Path.home())
+            plan = state.plan
+            logs.append(f"[{target.title}] {state.summary}")
             self.draw_install_screen(index, total, target.title, logs)
 
             confirmed = True

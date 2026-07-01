@@ -3,6 +3,7 @@ from __future__ import annotations
 import filecmp
 import hashlib
 import shutil
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -16,6 +17,7 @@ class ConfigTarget:
     title: str
     repo_relative: str
     home_relative: str
+    commands: tuple[str, ...] = ()
 
     def repo_path(self, repo_root: Path) -> Path:
         return repo_root / self.repo_relative
@@ -62,6 +64,26 @@ class SyncResult:
     destination: Path
     backup_path: Path | None = None
     message: str = ""
+
+
+@dataclass(frozen=True)
+class ConfigTargetState:
+    target: ConfigTarget
+    direction: str
+    plan: SyncPlan
+    program_detected: bool
+    source_exists: bool
+    destination_exists: bool
+    default_selected: bool
+
+    @property
+    def summary(self) -> str:
+        program = "programa detectado" if self.program_detected else "programa no detectado"
+        if self.plan.status == "missing_source":
+            sync = "config origen no existe"
+        else:
+            sync = self.plan.summary
+        return f"{program}; {sync}"
 
 
 def _file_hash(path: Path) -> str:
@@ -129,6 +151,44 @@ def compare_paths(key: str, source: Path, destination: Path) -> SyncPlan:
         added_count=added,
         changed_count=changed,
         removed_count=removed,
+    )
+
+
+def evaluate_config_target(
+    target: ConfigTarget,
+    direction: str,
+    repo_root: Path,
+    home_root: Path,
+    *,
+    command_exists: Callable[[str], bool] | None = None,
+) -> ConfigTargetState:
+    if direction not in {"import", "export"}:
+        raise ValueError("direction must be 'import' or 'export'")
+
+    repo_path = target.repo_path(repo_root)
+    home_path = target.home_path(home_root)
+    if direction == "import":
+        source = repo_path
+        destination = home_path
+    else:
+        source = home_path
+        destination = repo_path
+
+    command_exists = command_exists or (lambda command: shutil.which(command) is not None)
+    program_detected = not target.commands or any(command_exists(command) for command in target.commands)
+    plan = compare_paths(target.key, source, destination)
+    source_exists = source.exists()
+    destination_exists = destination.exists()
+    default_selected = program_detected and source_exists and plan.status != "identical"
+
+    return ConfigTargetState(
+        target=target,
+        direction=direction,
+        plan=plan,
+        program_detected=program_detected,
+        source_exists=source_exists,
+        destination_exists=destination_exists,
+        default_selected=default_selected,
     )
 
 
@@ -214,15 +274,15 @@ def apply_sync_plan(
 
 
 DEFAULT_CONFIG_TARGETS: tuple[ConfigTarget, ...] = (
-    ConfigTarget("hyprland", "Hyprland", "hyprland/configs", ".config/hypr"),
-    ConfigTarget("mango", "Mango", "mango/configs", ".config/mango"),
-    ConfigTarget("noctalia", "Noctalia Shell", "noctalia/configs", ".config/noctalia"),
-    ConfigTarget("waybar", "Waybar", "waybar/configs", ".config/waybar"),
-    ConfigTarget("kitty", "Kitty", "kitty/configs", ".config/kitty"),
-    ConfigTarget("rofi", "Rofi", "rofi/configs", ".config/rofi"),
-    ConfigTarget("swaync", "swaync", "swaync/configs", ".config/swaync"),
-    ConfigTarget("wlogout", "wlogout", "wlogout/configs", ".config/wlogout"),
-    ConfigTarget("nvim", "Neovim", "nvim/configs", ".config/nvim"),
-    ConfigTarget("yazi", "Yazi", "yazi/configs", ".config/yazi"),
-    ConfigTarget("opencode", "Opencode", "opencode/configs", ".config/opencode"),
+    ConfigTarget("hyprland", "Hyprland", "hyprland/configs", ".config/hypr", commands=("Hyprland", "hyprland")),
+    ConfigTarget("mango", "Mango", "mango/configs", ".config/mango", commands=("mango",)),
+    ConfigTarget("noctalia", "Noctalia Shell", "noctalia/configs", ".config/noctalia", commands=("qs",)),
+    ConfigTarget("waybar", "Waybar", "waybar/configs", ".config/waybar", commands=("waybar",)),
+    ConfigTarget("kitty", "Kitty", "kitty/configs", ".config/kitty", commands=("kitty",)),
+    ConfigTarget("rofi", "Rofi", "rofi/configs", ".config/rofi", commands=("rofi",)),
+    ConfigTarget("swaync", "swaync", "swaync/configs", ".config/swaync", commands=("swaync",)),
+    ConfigTarget("wlogout", "wlogout", "wlogout/configs", ".config/wlogout", commands=("wlogout",)),
+    ConfigTarget("nvim", "Neovim", "nvim/configs", ".config/nvim", commands=("nvim",)),
+    ConfigTarget("yazi", "Yazi", "yazi/configs", ".config/yazi", commands=("yazi",)),
+    ConfigTarget("opencode", "Opencode", "opencode/configs", ".config/opencode", commands=("opencode",)),
 )
