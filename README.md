@@ -51,11 +51,23 @@ Permite elegir componentes de escritorio/barra:
 - MangoWM
 - Waybar
 - Noctalia Shell
+- TTY session profiles: asocia cada TTY con un escritorio y una barra sin mezclar configs
 - swaync
 - wlogout
 - Rofi
 - Kitty
 - GNOME Keyring o KeePassXC
+
+Los perfiles TTY instalan un bloque gestionado en `~/.zprofile`, scripts en `~/.local/bin/` y un archivo editable en `~/.config/init-install/tty-profiles.conf`. Por ejemplo:
+
+```bash
+TTY1_DESKTOP=hyprland
+TTY1_BAR=waybar
+TTY3_DESKTOP=mango
+TTY3_BAR=noctalia
+```
+
+Hyprland y Mango solo llaman a `init-install-autostart`; la barra real se decide desde el perfil del TTY.
 
 ### Install software
 
