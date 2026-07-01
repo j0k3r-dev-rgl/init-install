@@ -2,3 +2,4 @@
 openspec/
 __pycache__/
 *.py[cod]
+.config_backups/

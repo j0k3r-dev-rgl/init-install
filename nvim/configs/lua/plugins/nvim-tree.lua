@@ -82,14 +82,14 @@ return {
         end
       end
 
-      -- h: cerrar directorio o ir al padre
+      -- h: cerrar directorio expandido o ir al padre si ya esta cerrado
       local function smart_close()
         local node = api.tree.get_node_under_cursor()
-        if node.nodes ~= nil and node.nodes[1] ~= nil then
-          -- Tiene hijos expandidos: colapsar
-          api.node.navigate.parent_close()
+        if node.nodes ~= nil and node.open then
+          -- Es un directorio abierto: colapsar
+          api.node.open.edit()
         else
-          -- Ir al directorio padre
+          -- Ya cerrado o es un archivo: ir al directorio padre
           api.node.navigate.parent_close()
         end
       end

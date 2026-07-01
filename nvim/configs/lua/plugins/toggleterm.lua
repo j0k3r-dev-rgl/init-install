@@ -46,7 +46,6 @@ return {
     vim.keymap.set("t", "<C-l>", [[<Cmd>wincmd l<CR>]], { desc = "Mover derecha" })
 
     -- Redimensionar terminal con Ctrl+Alt+flechas (funciona en modo terminal y normal)
-    local resize_amount = 5
     vim.keymap.set("t", "<C-A-Right>", [[<Cmd>vertical resize +5<CR>]], { desc = "Agrandar terminal" })
     vim.keymap.set("t", "<C-A-Left>",  [[<Cmd>vertical resize -5<CR>]], { desc = "Achicar terminal" })
     vim.keymap.set("n", "<C-A-Right>", [[<Cmd>vertical resize +5<CR>]], { desc = "Agrandar terminal" })

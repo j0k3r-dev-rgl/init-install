@@ -8,8 +8,20 @@ return {
     -- Keymaps
     keymap = {
       preset  = "default",
-      ["<CR>"]      = { "accept", "fallback" },
-      ["<Tab>"]     = { "select_next", "snippet_forward", "fallback" },
+      ["<CR>"]  = { "accept", "fallback" },
+      ["<Tab>"] = {
+        "select_next",
+        "snippet_forward",
+        function(cmp)
+          -- Si el menu esta visible pero nada seleccionado, igual deja tabular
+          if not cmp.is_visible() then
+            vim.api.nvim_feedkeys(
+              vim.api.nvim_replace_termcodes("<Tab>", true, false, true),
+              "n", false
+            )
+          end
+        end,
+      },
       ["<S-Tab>"]   = { "select_prev", "snippet_backward", "fallback" },
       ["<C-Space>"] = { "show", "show_documentation", "hide_documentation" },
       ["<C-e>"]     = { "hide", "fallback" },

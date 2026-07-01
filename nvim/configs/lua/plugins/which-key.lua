@@ -23,13 +23,14 @@ return {
       -- Grupos para organizar el menu
       { "<leader>f", group = "Buscar" },
       { "<leader>j", group = "Java" },
-      { "<leader>d", group = "Diagnosticos" },
+      { "<leader>d", group = "Diagnosticos / Debug" },
       { "<leader>c", group = "Codigo" },
       { "<leader>r", group = "Renombrar" },
       { "<leader>b", group = "Buffers" },
       { "<leader>w", group = "Sesiones" },
-      { "<leader>d", group = "Debug" },
       { "<leader>t", group = "Terminal / Agentes" },
+      { "<leader>h", group = "Git hunks" },
+      { "<leader>m", group = "Lanzador / Servicios" },
     },
   },
 }

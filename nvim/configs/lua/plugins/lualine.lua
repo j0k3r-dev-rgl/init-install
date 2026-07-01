@@ -67,16 +67,6 @@ return {
             separator = " ",
           },
         },
-        -- Estado de Codeium (ghost text IA)
-        {
-          function()
-            local ok, status = pcall(require, "codeium.virtual_text")
-            if ok then return "󰘦 " .. status.status_string() end
-            return ""
-          end,
-          cond  = function() return package.loaded["codeium.virtual_text"] ~= nil end,
-          color = { fg = "#09B6A2" },
-        },
         "encoding",
         "fileformat",
         "filetype",

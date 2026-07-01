@@ -34,7 +34,7 @@ if sudo pacman -S --needed --noconfirm \
     nodejs-lts-krypton npm pnpm yarn bun \
     python python-pip python-pynvim \
     jdk-openjdk maven gradle \
-    tree-sitter tree-sitter-cli wl-clipboard; then
+    tree-sitter tree-sitter-cli wl-clipboard imagemagick; then
     print_ok "Neovim y dependencias instalados"
 else
     die "Falló la instalación con pacman"

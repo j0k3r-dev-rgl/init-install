@@ -37,6 +37,7 @@ class NvimInstallerTests(unittest.TestCase):
             "tree-sitter",
             "tree-sitter-cli",
             "wl-clipboard",
+            "imagemagick",
         ]
         for package in required_packages:
             with self.subTest(package=package):

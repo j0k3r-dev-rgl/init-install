@@ -103,15 +103,6 @@ local config = {
         },
       },
 
-      -- Formato
-      format = {
-        enabled = true,
-        settings = {
-          url = "",
-          profile = "",
-        },
-      },
-
       -- Maven y Gradle
       maven = { downloadSources = true },
       gradle = { enabled = true },
@@ -142,23 +133,11 @@ local config = {
   },
 
   on_attach = function(client, bufnr)
-    -- Keymaps generales de LSP
     local map = function(mode, lhs, rhs, desc)
       vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true, desc = desc })
     end
 
-    map("n", "gd", vim.lsp.buf.definition, "Ir a definicion")
-    map("n", "gD", vim.lsp.buf.declaration, "Ir a declaracion")
-    map("n", "gr", vim.lsp.buf.references, "Referencias")
-    map("n", "gi", vim.lsp.buf.implementation, "Implementacion")
-    map("n", "K", vim.lsp.buf.hover, "Documentacion")
-    map("n", "<leader>ca", vim.lsp.buf.code_action, "Code action")
-    map("n", "<leader>rn", vim.lsp.buf.rename, "Renombrar")
-    map("n", "<leader>f", function() vim.lsp.buf.format({ async = true }) end, "Formatear")
-    map("n", "[d", vim.diagnostic.goto_prev, "Diagnostico anterior")
-    map("n", "]d", vim.diagnostic.goto_next, "Diagnostico siguiente")
-
-    -- Keymaps especificos de Java
+    -- Keymaps especificos de Java (los generales de LSP los maneja lsp.lua via LspAttach)
     map("n", "<leader>jd", vim.lsp.buf.definition,                              "Ir a definicion")
     map("n", "<leader>ji", vim.lsp.buf.implementation,                          "Ir a implementacion")
     map("n", "<leader>ju", function()
