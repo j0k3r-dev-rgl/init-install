@@ -32,11 +32,11 @@ if [ ! -t 0 ]; then
     exit 1
 fi
 
-# Zsh ahora es una opción del menú Software; no bloquea el instalador principal.
-if ! command -v zsh >/dev/null 2>&1 || [ "${SHELL:-}" != "$(command -v zsh 2>/dev/null || true)" ]; then
+# Zsh es opcional; el instalador principal no depende de él.
+if ! command -v zsh >/dev/null 2>&1; then
     echo ""
-    echo "  AVISO: Zsh no está configurado como shell por defecto."
-    echo "  Puedes instalarlo luego desde: Install software -> Zsh setup."
+    echo "  AVISO: Zsh no está instalado."
+    echo "  Puedes instalarlo luego desde: Install software -> Zsh."
     echo ""
 fi
 

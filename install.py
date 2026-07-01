@@ -228,8 +228,8 @@ SOFTWARE_SECTION = Section(
         Category("claude_code", "Claude Code", "Claude Code CLI", "Instalador oficial de Claude Code.", scripts("claude_code/install_claude_code.sh")),
         Category("codex", "Codex", "Codex CLI via Homebrew", "Requiere Homebrew.", scripts("codex/install_codex.sh")),
         Category("intellij", "IntelliJ IDEA", "IntelliJ IDEA Ultimate oficial", "Descarga desde API oficial JetBrains.", scripts("intellij/install_intellij.sh")),
-        Category("ssh", "SSH", "Configura claves SSH", "Módulo interactivo de SSH.", scripts("ssh/install_ssh.sh")),
-        Category("zsh", "Zsh setup", "Zsh, Oh My Zsh y plugins", "Ejecuta pre_install.sh.", scripts("pre_install.sh")),
+        Category("ssh", "SSH", "Instala OpenSSH", package_text("openssh"), scripts("ssh/install_ssh.sh")),
+        Category("zsh", "Zsh", "Instala Zsh, Oh My Zsh, plugins y aliases", "Acciones:\n- instala zsh, git y eza\n- clona/actualiza Oh My Zsh\n- clona/actualiza zsh-autosuggestions, zsh-syntax-highlighting y zsh-completions\n- activa plugins y aliases en ~/.zshrc con backup y bloque gestionado", scripts("zsh/install_zsh.sh")),
     ),
 )
 
