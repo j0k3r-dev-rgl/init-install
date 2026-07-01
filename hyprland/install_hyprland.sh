@@ -19,7 +19,8 @@ print_info "Instalando herramientas de captura de pantalla..."
 sudo pacman -S --needed --noconfirm \
     grim \
     slurp \
-    wl-clipboard
+    wl-clipboard \
+    flameshot
 
 # Integración con portales y Qt Wayland
 print_info "Instalando portales XDG y soporte Qt Wayland..."
