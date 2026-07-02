@@ -195,7 +195,7 @@ SOFTWARE_SECTION = Section(
     (
         Category("firefox", "Firefox", "Navegador Firefox", package_text("firefox"), internal_runner=install_pacman_packages("Firefox", ["firefox"])),
         Category("google_chrome", "Google Chrome", "Navegador Google Chrome desde AUR", package_text("google-chrome"), internal_runner=install_yay_packages("Google Chrome", ["google-chrome"])),
-        Category("discord", "Discord", "Cliente Discord", package_text("discord"), internal_runner=install_pacman_packages("Discord", ["discord"])),
+        Category("discord", "Discord", "Cliente Discord con soporte de compartir pantalla", "Instala Discord, PipeWire, portales XDG y configura el launcher con flags WebRTC.", scripts("discord/install_discord.sh")),
         Category("obsidian", "Obsidian", "Notas Markdown", package_text("obsidian"), internal_runner=install_pacman_packages("Obsidian", ["obsidian"])),
         Category("onlyoffice", "OnlyOffice", "Suite ofimática desde AUR", package_text("onlyoffice-bin"), internal_runner=install_yay_packages("OnlyOffice", ["onlyoffice-bin"])),
         Category("media_tools", "Multimedia", "Reproductor, imágenes y descargas", package_text("mpv", "gimp", "yt-dlp", "ffmpeg"), internal_runner=install_pacman_packages("Multimedia", ["mpv", "gimp", "yt-dlp", "ffmpeg"])),
