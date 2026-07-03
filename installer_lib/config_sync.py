@@ -256,7 +256,6 @@ DEFAULT_CONFIG_TARGETS: tuple[ConfigTarget, ...] = (
     ConfigTarget("kitty", "Kitty", "kitty/configs", ".config/kitty", commands=("kitty",)),
     ConfigTarget("rofi", "Rofi", "rofi/configs", ".config/rofi", commands=("rofi",)),
     ConfigTarget("swaync", "swaync", "swaync/configs", ".config/swaync", commands=("swaync",)),
-    ConfigTarget("wlogout", "wlogout", "wlogout/configs", ".config/wlogout", commands=("wlogout",)),
     ConfigTarget("nvim", "Neovim", "nvim/configs", ".config/nvim", commands=("nvim",)),
     ConfigTarget("yazi", "Yazi", "yazi/configs", ".config/yazi", commands=("yazi",)),
 )
