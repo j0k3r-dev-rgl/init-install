@@ -185,6 +185,7 @@ DESKTOP_SECTION = Section(
         Category("swaync", "swaync", "Centro de notificaciones", package_text("swaync", "python-gobject"), scripts("swaync/install_swaync.sh")),
         Category("rofi", "Rofi", "Launcher y applets", package_text("rofi"), scripts("rofi/install_rofi.sh")),
         Category("kitty", "Kitty", "Terminal Kitty", package_text("kitty"), scripts("kitty/install_kitty.sh")),
+        Category("ghostty", "Ghostty", "Terminal Ghostty", package_text("ghostty"), internal_runner=install_pacman_packages("Ghostty", ["ghostty"])),
         Category("keyring", "GNOME Keyring", "Keyring, libsecret y agente SSH", package_text("gnome-keyring", "libsecret", "seahorse", "gcr-4"), scripts("keyring/install_keyring.sh", "keyring/configure_keyring.sh")),
     ),
 )

@@ -1,0 +1,59 @@
+# Ghostty — Black Electric
+# Repo sync target: ~/.config/ghostty/config
+# Styled to match the Kitty scale: 10pt font, 15px padding, 0.85 opacity.
+
+# Typography
+font-family = JetBrainsMono Nerd Font
+font-size = 10
+font-thicken = false
+adjust-cell-height = 0%
+adjust-cell-width = 0%
+
+# Window
+window-decoration = false
+window-padding-x = 15
+window-padding-y = 15
+window-padding-balance = true
+window-theme = ghostty
+
+# Background / glass effect
+background = 000000
+foreground = 8be9fd
+background-opacity = 0.85
+background-blur-radius = 20
+
+# Cursor
+cursor-style = bar
+cursor-style-blink = true
+cursor-color = 00e5ff
+
+# Selection
+selection-background = 003a52
+selection-foreground = f4fdff
+
+# Black Electric palette
+palette = 0=#000000
+palette = 1=#ff4f7b
+palette = 2=#7df9c7
+palette = 3=#ffd166
+palette = 4=#00bfff
+palette = 5=#9dbbff
+palette = 6=#00e5ff
+palette = 7=#8be9fd
+palette = 8=#101820
+palette = 9=#ff6f91
+palette = 10=#9fffe0
+palette = 11=#ffe08a
+palette = 12=#36d6ff
+palette = 13=#b7c9ff
+palette = 14=#72f7ff
+palette = 15=#f4fdff
+
+# Shell integration
+shell-integration = detect
+copy-on-select = clipboard
+confirm-close-surface = false
+
+# Subtle terminal polish
+bold-is-bright = true
+mouse-hide-while-typing = true

@@ -41,6 +41,12 @@ class PackageCategoriesTests(unittest.TestCase):
         self.assertIn('Category("eww"', source)
         self.assertIn('install_yay_packages("eww", ["eww"]', source)
 
+    def test_ghostty_is_installed_from_pacman(self):
+        source = INSTALL_PY.read_text(encoding="utf-8")
+
+        self.assertIn('Category("ghostty"', source)
+        self.assertIn('install_pacman_packages("Ghostty", ["ghostty"]', source)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -254,6 +254,7 @@ DEFAULT_CONFIG_TARGETS: tuple[ConfigTarget, ...] = (
     ConfigTarget("hyprland", "Hyprland", "hyprland/configs", ".config/hypr", commands=("Hyprland", "hyprland")),
     ConfigTarget("wallpapers", "Wallpapers", "wallpapers/configs", ".config/wallpapers"),
     ConfigTarget("kitty", "Kitty", "kitty/configs", ".config/kitty", commands=("kitty",)),
+    ConfigTarget("ghostty", "Ghostty", "ghostty/configs", ".config/ghostty", commands=("ghostty",)),
     ConfigTarget("rofi", "Rofi", "rofi/configs", ".config/rofi", commands=("rofi",)),
     ConfigTarget("eww", "eww", "eww/configs", ".config/eww", commands=("eww",)),
     ConfigTarget("swaync", "swaync", "swaync/configs", ".config/swaync", commands=("swaync",)),

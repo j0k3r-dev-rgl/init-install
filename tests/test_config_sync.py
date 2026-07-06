@@ -103,6 +103,14 @@ class ConfigSyncTests(unittest.TestCase):
         self.assertEqual(targets["eww"].home_relative, ".config/eww")
         self.assertEqual(targets["eww"].commands, ("eww",))
 
+    def test_default_targets_include_ghostty_config_sync(self):
+        targets = {target.key: target for target in DEFAULT_CONFIG_TARGETS}
+
+        self.assertIn("ghostty", targets)
+        self.assertEqual(targets["ghostty"].repo_relative, "ghostty/configs")
+        self.assertEqual(targets["ghostty"].home_relative, ".config/ghostty")
+        self.assertEqual(targets["ghostty"].commands, ("ghostty",))
+
 
 if __name__ == "__main__":
     unittest.main()
