@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "${1:-}" in
+  time)
+    date '+%H:%M · %a %d %b'
+    ;;
+  cpu)
+    awk -v cores="$(nproc 2>/dev/null || echo 1)" '{ printf "%d%%\n", ($1 / cores) * 100 }' /proc/loadavg
+    ;;
+  ram)
+    free -h | awk '/^Mem:/ { gsub(/i/, "", $3); gsub(/i/, "", $2); print $3 "/" $2 }'
+    ;;
+  disk)
+    df -h / | awk 'NR == 2 { print $5 " " $4 }'
+    ;;
+  net)
+    iface="$(ip route get 1.1.1.1 2>/dev/null | awk '{for (i=1;i<=NF;i++) if ($i=="dev") {print $(i+1); exit}}')"
+    if [[ -z "${iface:-}" || ! -r "/sys/class/net/$iface/statistics/rx_bytes" ]]; then
+      printf 'offline\n'
+      exit 0
+    fi
+
+    state_file="${XDG_RUNTIME_DIR:-/tmp}/eww-net-${iface}.state"
+    now="$(date +%s)"
+    rx="$(cat "/sys/class/net/$iface/statistics/rx_bytes")"
+    tx="$(cat "/sys/class/net/$iface/statistics/tx_bytes")"
+
+    if [[ -r "$state_file" ]]; then
+      read -r prev_now prev_rx prev_tx < "$state_file" || true
+    else
+      prev_now="$now"
+      prev_rx="$rx"
+      prev_tx="$tx"
+    fi
+
+    printf '%s %s %s\n' "$now" "$rx" "$tx" > "$state_file"
+
+    elapsed=$(( now - ${prev_now:-$now} ))
+    if (( elapsed <= 0 )); then elapsed=1; fi
+
+    rx_rate=$(( (rx - ${prev_rx:-$rx}) / elapsed ))
+    tx_rate=$(( (tx - ${prev_tx:-$tx}) / elapsed ))
+    if (( rx_rate < 0 )); then rx_rate=0; fi
+    if (( tx_rate < 0 )); then tx_rate=0; fi
+
+    format_rate() {
+      local bytes="$1"
+      awk -v b="$bytes" 'BEGIN {
+        if (b >= 1048576) printf "%.1fM", b / 1048576;
+        else if (b >= 1024) printf "%3dK", b / 1024;
+        else printf "%3dB", b;
+      }'
+    }
+
+    printf '↓ %s  ↑ %s\n' "$(format_rate "$rx_rate")" "$(format_rate "$tx_rate")"
+    ;;
+  bat)
+    bat_path="$(find /sys/class/power_supply -maxdepth 1 -type l -name 'BAT*' 2>/dev/null | head -n 1 || true)"
+    if [[ -n "${bat_path:-}" && -r "$bat_path/capacity" ]]; then
+      capacity="$(cat "$bat_path/capacity")"
+      status="$(cat "$bat_path/status" 2>/dev/null || echo '')"
+      case "$status" in
+        Charging) printf '%s%% 󰂄\n' "$capacity" ;;
+        Full) printf '%s%% full\n' "$capacity" ;;
+        *) printf '%s%%\n' "$capacity" ;;
+      esac
+    else
+      printf 'AC\n'
+    fi
+    ;;
+  *)
+    printf 'n/a\n'
+    ;;
+esac

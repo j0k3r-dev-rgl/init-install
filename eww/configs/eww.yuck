@@ -1,0 +1,40 @@
+;; Floating horizontal system widget for Hyprland
+
+(defpoll sys_time :interval "10s" "~/.config/eww/scripts/system-widget-info time")
+(defpoll sys_cpu  :interval "2s"  "~/.config/eww/scripts/system-widget-info cpu")
+(defpoll sys_ram  :interval "2s"  "~/.config/eww/scripts/system-widget-info ram")
+(defpoll sys_disk :interval "30s" "~/.config/eww/scripts/system-widget-info disk")
+(defpoll sys_net  :interval "2s"  "~/.config/eww/scripts/system-widget-info net")
+
+(defwidget sys-chip [icon label value accent]
+  (box :class "sys-chip ${accent}"
+       :orientation "h"
+       :space-evenly false
+    (label :class "sys-icon" :text icon)
+    (label :class "sys-label" :text label)
+    (label :class "sys-value" :halign "center" :text value)))
+
+(defwidget system-widget []
+  (box :class "system-widget"
+       :orientation "h"
+       :space-evenly false
+    (box :class "brand-chip" :orientation "h" :space-evenly false
+      (label :class "brand-icon" :text "")
+      (label :class "brand-title" :text "ARCH")
+      (label :class "brand-subtitle" :halign "start" :text sys_time))
+    (sys-chip :icon "󰻠" :label "CPU" :value sys_cpu :accent "cyan")
+    (sys-chip :icon "󰘚" :label "RAM" :value sys_ram :accent "green")
+    (sys-chip :icon "󰋊" :label "DISK" :value sys_disk :accent "mauve")
+    (sys-chip :icon "󰈀" :label "I/O" :value sys_net :accent "blue")))
+
+(defwindow system-widget
+  :monitor 0
+  :geometry (geometry :x "0px"
+                      :y "3px"
+                      :width "790px"
+                      :height "38px"
+                      :anchor "top center")
+  :stacking "overlay"
+  :exclusive false
+  :focusable false
+  (system-widget))

@@ -192,8 +192,7 @@
 }
 
 .notification {
-    background:
-        linear-gradient(135deg, alpha(@electric, 0.18), alpha(@electric2, 0.12) 42%, alpha(@bg, 0.95) 100%);
+    background: linear-gradient(135deg, #07111f 0%, #091827 48%, #030509 100%);
     border: 1px solid alpha(@electric, 0.48);
     border-left: 4px solid @electric;
     border-radius: 20px;
@@ -216,8 +215,7 @@
 }
 
 .notification:hover {
-    background:
-        linear-gradient(135deg, alpha(@electric, 0.26), alpha(@electric2, 0.18) 48%, alpha(@bg, 0.98) 100%);
+    background: linear-gradient(135deg, #0a1b2f 0%, #0d2235 48%, #050914 100%);
     border-color: @electric;
     box-shadow:
         0 0 0 1px alpha(@electric, 0.25) inset,
@@ -235,7 +233,7 @@
 
 .notification.critical {
     border-left-color: @red;
-    background: linear-gradient(135deg, alpha(@red, 0.22), alpha(@bg, 0.96));
+    background: linear-gradient(135deg, #2a0612 0%, #120711 45%, #030509 100%);
     box-shadow: 0 0 34px alpha(@red, 0.42), 0 18px 44px alpha(black, 0.76);
 }
 

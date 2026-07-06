@@ -35,6 +35,12 @@ class PackageCategoriesTests(unittest.TestCase):
             with self.subTest(package=package):
                 self.assertIn(package, source)
 
+    def test_eww_is_installed_from_yay(self):
+        source = INSTALL_PY.read_text(encoding="utf-8")
+
+        self.assertIn('Category("eww"', source)
+        self.assertIn('install_yay_packages("eww", ["eww"]', source)
+
 
 if __name__ == "__main__":
     unittest.main()

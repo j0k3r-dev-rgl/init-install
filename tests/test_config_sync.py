@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from installer_lib.config_sync import compare_paths, apply_sync_plan, ConfigTarget
+from installer_lib.config_sync import compare_paths, apply_sync_plan, ConfigTarget, DEFAULT_CONFIG_TARGETS
 
 
 class ConfigSyncTests(unittest.TestCase):
@@ -94,6 +94,14 @@ class ConfigSyncTests(unittest.TestCase):
 
         self.assertEqual(target.repo_path(root), Path("/repo/rofi/configs"))
         self.assertEqual(target.home_path(home), Path("/home/user/.config/rofi"))
+
+    def test_default_targets_include_eww_config_sync(self):
+        targets = {target.key: target for target in DEFAULT_CONFIG_TARGETS}
+
+        self.assertIn("eww", targets)
+        self.assertEqual(targets["eww"].repo_relative, "eww/configs")
+        self.assertEqual(targets["eww"].home_relative, ".config/eww")
+        self.assertEqual(targets["eww"].commands, ("eww",))
 
 
 if __name__ == "__main__":

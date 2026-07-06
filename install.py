@@ -181,6 +181,7 @@ DESKTOP_SECTION = Section(
     "Entornos gráficos, shell/barra y componentes visuales",
     (
         Category("hyprland", "Hyprland", "Instala Hyprland y dependencias", "Paquetes y acciones del módulo hyprland.", scripts("hyprland/install_hyprland.sh")),
+        Category("eww", "eww", "Widget system para escritorio", package_text("eww"), internal_runner=install_yay_packages("eww", ["eww"])),
         Category("swaync", "swaync", "Centro de notificaciones", package_text("swaync", "python-gobject"), scripts("swaync/install_swaync.sh")),
         Category("rofi", "Rofi", "Launcher y applets", package_text("rofi"), scripts("rofi/install_rofi.sh")),
         Category("kitty", "Kitty", "Terminal Kitty", package_text("kitty"), scripts("kitty/install_kitty.sh")),

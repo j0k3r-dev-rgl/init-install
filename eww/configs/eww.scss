@@ -1,0 +1,90 @@
+* {
+  all: unset;
+  font-family: "JetBrainsMono Nerd Font", "CaskaydiaCove Nerd Font", "FiraCode Nerd Font", sans-serif;
+}
+
+.system-widget {
+  padding: 2px;
+  background: linear-gradient(135deg, rgba(2, 12, 24, 0.92), rgba(7, 24, 44, 0.82));
+  border: 1px solid rgba(0, 191, 255, 0.46);
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 1px rgba(0, 191, 255, 0.12) inset,
+    0 0 22px rgba(0, 191, 255, 0.22),
+    0 8px 28px rgba(0, 0, 0, 0.42);
+}
+
+.brand-chip,
+.sys-chip {
+  min-height: 23px;
+  padding: 1px 9px;
+  margin: 0 2px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(8, 30, 54, 0.78), rgba(18, 24, 44, 0.68));
+  border: 1px solid rgba(0, 191, 255, 0.16);
+}
+
+.brand-chip { min-width: 188px; }
+.sys-chip.cyan { min-width: 78px; }
+.sys-chip.green { min-width: 108px; }
+.sys-chip.mauve { min-width: 132px; }
+.sys-chip.blue { min-width: 162px; }
+
+.brand-chip {
+  margin-left: 0;
+  padding-right: 7px;
+  background: linear-gradient(135deg, rgba(0, 191, 255, 0.30), rgba(8, 145, 220, 0.16));
+  border-color: rgba(0, 191, 255, 0.34);
+}
+
+.brand-icon,
+.sys-icon {
+  font-size: 16px;
+  margin-right: 7px;
+}
+
+.brand-icon {
+  color: #00bfff;
+  margin-right: 9px;
+  text-shadow: 0 0 10px rgba(0, 191, 255, 0.80);
+}
+
+.brand-title {
+  color: #dff7ff;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  margin-right: 8px;
+}
+
+.brand-subtitle,
+.sys-label {
+  color: #8bdcff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1px;
+}
+
+.sys-label {
+  margin-right: 7px;
+}
+
+.sys-value {
+  color: #f4fdff;
+  font-size: 12px;
+  font-weight: 900;
+  margin-left: 1px;
+  margin-right: 1px;
+}
+
+.sys-chip.cyan .sys-value { min-width: 30px; }
+.sys-chip.green .sys-value { min-width: 58px; }
+.sys-chip.mauve .sys-value { min-width: 76px; }
+.sys-chip.blue .sys-value { min-width: 106px; }
+.brand-subtitle { min-width: 104px; }
+
+.sys-chip.cyan .sys-icon { color: #00e5ff; }
+.sys-chip.green .sys-icon { color: #7df9c7; }
+.sys-chip.mauve .sys-icon { color: #9dbbff; }
+.sys-chip.blue .sys-icon { color: #00bfff; }
+.sys-chip.peach .sys-icon { color: #fab387; }
