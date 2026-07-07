@@ -88,3 +88,88 @@
 .sys-chip.mauve .sys-icon { color: #9dbbff; }
 .sys-chip.blue .sys-icon { color: #00bfff; }
 .sys-chip.peach .sys-icon { color: #fab387; }
+
+.chatgpt-usage {
+  padding: 4px;
+  background: linear-gradient(135deg, rgba(2, 12, 24, 0.94), rgba(7, 24, 44, 0.86));
+  border: 1px solid rgba(0, 191, 255, 0.46);
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 1px rgba(0, 191, 255, 0.12) inset,
+    0 0 22px rgba(0, 191, 255, 0.22),
+    0 8px 28px rgba(0, 0, 0, 0.42);
+}
+
+.gpt-header {
+  min-height: 25px;
+  padding: 2px 9px;
+  margin-bottom: 4px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(0, 191, 255, 0.30), rgba(8, 145, 220, 0.16));
+  border: 1px solid rgba(0, 191, 255, 0.34);
+}
+
+.gpt-brand-icon {
+  color: #00e5ff;
+  font-size: 16px;
+  margin-right: 8px;
+  text-shadow: 0 0 10px rgba(0, 191, 255, 0.80);
+}
+
+.gpt-title {
+  color: #dff7ff;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  margin-right: 6px;
+}
+
+.gpt-title-muted {
+  color: rgba(139, 220, 255, 0.58);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+}
+
+.gpt-grid { margin-top: 0; }
+.gpt-column.quota { min-width: 180px; margin-right: 4px; }
+.gpt-column.meta { min-width: 188px; }
+
+.gpt-row {
+  min-height: 22px;
+  padding: 1px 7px;
+  margin: 1px 0;
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(8, 30, 54, 0.78), rgba(18, 24, 44, 0.68));
+  border: 1px solid rgba(0, 191, 255, 0.16);
+}
+
+.gpt-row-icon {
+  font-size: 14px;
+  margin-right: 6px;
+}
+
+.gpt-row-label {
+  color: #9fe6ff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.1px;
+  min-width: 66px;
+}
+
+.gpt-row-value {
+  color: #f4fdff;
+  font-size: 11px;
+  font-weight: 900;
+  min-width: 86px;
+}
+
+.gpt-column.quota .gpt-row-label { min-width: 56px; }
+.gpt-column.quota .gpt-row-value { min-width: 86px; }
+.gpt-column.meta .gpt-row-label { min-width: 54px; }
+.gpt-column.meta .gpt-row-value { min-width: 94px; }
+
+.gpt-row.cyan .gpt-row-icon { color: #00e5ff; }
+.gpt-row.mauve .gpt-row-icon { color: #9dbbff; }
+.gpt-row.blue .gpt-row-icon { color: #00bfff; }
+.gpt-row.green .gpt-row-icon { color: #7df9c7; }

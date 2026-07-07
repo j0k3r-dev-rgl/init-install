@@ -6,6 +6,11 @@
 (defpoll sys_disk :interval "30s" "~/.config/eww/scripts/system-widget-info disk")
 (defpoll sys_net  :interval "2s"  "~/.config/eww/scripts/system-widget-info net")
 
+(defpoll gpt_primary   :interval "45s" "~/.config/eww/scripts/chatgpt-usage-info primary")
+(defpoll gpt_secondary :interval "45s" "~/.config/eww/scripts/chatgpt-usage-info secondary")
+(defpoll gpt_extra     :interval "45s" "~/.config/eww/scripts/chatgpt-usage-info extra")
+(defpoll gpt_credits   :interval "45s" "~/.config/eww/scripts/chatgpt-usage-info credits")
+
 (defwidget sys-chip [icon label value accent]
   (box :class "sys-chip ${accent}"
        :orientation "h"
@@ -38,3 +43,39 @@
   :exclusive false
   :focusable false
   (system-widget))
+
+(defwidget gpt-row [icon label value accent]
+  (box :class "gpt-row ${accent}"
+       :orientation "h"
+       :space-evenly false
+    (label :class "gpt-row-icon" :text icon)
+    (label :class "gpt-row-label" :text label)
+    (label :class "gpt-row-value" :halign "end" :text value)))
+
+(defwidget chatgpt-usage []
+  (box :class "chatgpt-usage"
+       :orientation "v"
+       :space-evenly false
+    (box :class "gpt-header" :orientation "h" :halign "center" :space-evenly false
+      (label :class "gpt-brand-icon" :text "󰚩")
+      (label :class "gpt-title" :text "CHATGPT QUOTA")
+      (label :class "gpt-title-muted" :text "(LEFT)"))
+    (box :class "gpt-grid" :orientation "h" :space-evenly false
+      (box :class "gpt-column quota" :orientation "v" :space-evenly false
+        (gpt-row :icon "󰔟" :label "5 HOURS" :value gpt_primary :accent "cyan")
+        (gpt-row :icon "󰸗" :label "WEEKLY" :value gpt_secondary :accent "mauve"))
+      (box :class "gpt-column meta" :orientation "v" :space-evenly false
+        (gpt-row :icon "󱎫" :label "FEATURE" :value gpt_extra :accent "blue")
+        (gpt-row :icon "󰁹" :label "CREDITS" :value gpt_credits :accent "green")))))
+
+(defwindow chatgpt-usage
+  :monitor 0
+  :geometry (geometry :x "4px"
+                      :y "4px"
+                      :width "382px"
+                      :height "104px"
+                      :anchor "top right")
+  :stacking "overlay"
+  :exclusive false
+  :focusable false
+  (chatgpt-usage))

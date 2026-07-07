@@ -1,0 +1,177 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Read ChatGPT/Codex usage using Pi's stored OAuth token without printing secrets.
+# Output small text snippets suitable for Eww labels.
+
+mode="${1:-summary}"
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/eww"
+cache_file="$cache_dir/chatgpt-usage.json"
+cache_ttl_seconds="${CHATGPT_USAGE_CACHE_TTL:-45}"
+endpoint="https://chatgpt.com/backend-api/wham/usage"
+
+mkdir -p "$cache_dir"
+chmod 700 "$cache_dir" 2>/dev/null || true
+
+python3 - "$mode" "$cache_file" "$cache_ttl_seconds" "$endpoint" <<'PY'
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+mode, cache_file, ttl_raw, endpoint = sys.argv[1:5]
+cache_path = Path(cache_file)
+ttl = int(ttl_raw)
+auth_path = Path.home() / ".pi" / "agent" / "auth.json"
+
+
+def load_cached():
+    try:
+        if cache_path.exists() and time.time() - cache_path.stat().st_mtime <= ttl:
+            with cache_path.open() as f:
+                return json.load(f)
+    except Exception:
+        return None
+    return None
+
+
+def save_cached(data):
+    tmp = cache_path.with_suffix(".tmp")
+    with tmp.open("w") as f:
+        json.dump(data, f)
+    os.chmod(tmp, 0o600)
+    tmp.replace(cache_path)
+
+
+def fetch_usage():
+    with auth_path.open() as f:
+        auth = json.load(f)
+    token = auth.get("openai-codex", {}).get("access")
+    if not token:
+        return {"_error": "sin token"}
+
+    req = urllib.request.Request(
+        endpoint,
+        headers={"Authorization": f"Bearer {token}", "Accept": "application/json"},
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            data = json.load(resp)
+            save_cached(data)
+            return data
+    except urllib.error.HTTPError as e:
+        if e.code in (401, 403):
+            return {"_error": "login"}
+        return {"_error": f"http {e.code}"}
+    except Exception:
+        return {"_error": "offline"}
+
+
+def pct(value):
+    try:
+        return f"{int(round(float(value)))}%"
+    except Exception:
+        return "--%"
+
+
+def left_pct(value):
+    try:
+        return f"{max(0, min(100, 100 - int(round(float(value)))))}%"
+    except Exception:
+        return "--%"
+
+
+def duration(seconds):
+    try:
+        s = max(0, int(seconds))
+    except Exception:
+        return "--"
+    d, rem = divmod(s, 86400)
+    h, rem = divmod(rem, 3600)
+    m, _ = divmod(rem, 60)
+    if d:
+        return f"{d}d {h}h"
+    if h:
+        return f"{h}h {m}m"
+    return f"{m}m"
+
+
+def window(data, key):
+    return data.get("rate_limit", {}).get(key, {}) or {}
+
+
+def additional_main(data):
+    limits = data.get("additional_rate_limits") or []
+    if not limits:
+        return None
+    # Prefer the most constrained additional bucket by max used percent.
+    best = None
+    best_used = -1
+    for item in limits:
+        rl = item.get("rate_limit", {}) or {}
+        vals = []
+        for wk in ("primary_window", "secondary_window"):
+            val = rl.get(wk, {}).get("used_percent")
+            if isinstance(val, (int, float)):
+                vals.append(val)
+        used = max(vals) if vals else -1
+        if used > best_used:
+            best_used = used
+            best = item
+    return best
+
+
+data = load_cached() or fetch_usage()
+err = data.get("_error") if isinstance(data, dict) else "error"
+if err:
+    outputs = {
+        "summary": f"GPT · {err}",
+        "plan": "GPT",
+        "status": err,
+        "primary": "--",
+        "secondary": "--",
+        "resets": "reset --",
+        "extra": "extra --",
+        "credits": "resets --",
+    }
+    print(outputs.get(mode, outputs["summary"]))
+    raise SystemExit(0)
+
+plan = str(data.get("plan_type") or "plan").upper()
+allowed = data.get("rate_limit", {}).get("allowed")
+limit_reached = data.get("rate_limit", {}).get("limit_reached")
+primary = window(data, "primary_window")
+secondary = window(data, "secondary_window")
+extra = additional_main(data)
+credits = data.get("rate_limit_reset_credits", {}) or {}
+
+status = "OK" if allowed and not limit_reached else "LIMIT"
+primary_text = f"{left_pct(primary.get('used_percent'))} · {duration(primary.get('reset_after_seconds'))}"
+secondary_text = f"{left_pct(secondary.get('used_percent'))} · {duration(secondary.get('reset_after_seconds'))}"
+reset_text = f"reset {duration(min([x for x in [primary.get('reset_after_seconds'), secondary.get('reset_after_seconds')] if isinstance(x, (int, float))], default=0))}"
+if extra:
+    name = str(extra.get("limit_name") or "extra").replace("GPT-", "").replace("Codex-", "")
+    rl = extra.get("rate_limit", {}) or {}
+    ew = rl.get("secondary_window") or rl.get("primary_window") or {}
+    extra_text = f"{name} {left_pct(ew.get('used_percent'))}"
+else:
+    extra_text = "extra --"
+credits_text = f"resets {credits.get('available_count', '--')}"
+summary = f"{plan} · {primary_text} · {secondary_text}"
+
+outputs = {
+    "summary": summary,
+    "plan": plan,
+    "status": status,
+    "primary": primary_text,
+    "secondary": secondary_text,
+    "resets": reset_text,
+    "extra": extra_text,
+    "credits": credits_text,
+}
+print(outputs.get(mode, summary))
+PY
