@@ -13,36 +13,37 @@ if [[ -f "$PID_FILE" ]]; then
   if [[ -n "${pid:-}" ]] && kill -0 "$pid" 2>/dev/null; then
     kill -INT "$pid" 2>/dev/null || true
     rm -f "$PID_FILE"
-    notify "Grabación terminada"
+    notify "Recording stopped"
     exit 0
   fi
   rm -f "$PID_FILE"
 fi
 
 if ! command -v wf-recorder >/dev/null 2>&1; then
-  notify "Instala wf-recorder para grabar pantalla"
+  notify "Install wf-recorder to record the screen"
   exit 1
 fi
 
 if ! command -v slurp >/dev/null 2>&1; then
-  notify "Instala slurp para seleccionar área"
+  notify "Install slurp to select an area"
   exit 1
 fi
 
 if ! command -v rofi >/dev/null 2>&1; then
-  notify "Instala rofi para elegir el modo de grabación"
+  notify "Install rofi to choose the recording mode"
   exit 1
 fi
 
-choice="$(printf 'Área\nPantalla completa\nCancelar\n' | rofi -dmenu -p 'Grabar')"
+theme="$HOME/.config/rofi/productivity-menu.rasi"
+choice="$(printf 'Area\nFull screen\nCancel\n' | rofi -dmenu -p '󰑋 Record' -mesg 'Choose recording mode · running again stops current recording' -theme "$theme" -theme-str 'window { width: 420px; } listview { lines: 3; }')"
 
 case "$choice" in
-  "Área")
+  "Area")
     geometry="$(slurp 2>/dev/null || true)"
     [[ -n "$geometry" ]] || exit 0
     args=(-g "$geometry")
     ;;
-  "Pantalla completa")
+  "Full screen")
     args=()
     ;;
   *)
@@ -54,7 +55,7 @@ mkdir -p "$OUTPUT_DIR"
 output="$OUTPUT_DIR/recording-$(date +%Y%m%d-%H%M%S).mp4"
 
 for seconds in 3 2 1; do
-  notify "Grabación inicia en $seconds"
+  notify "Recording starts in $seconds"
   sleep 1
 done
 
@@ -62,4 +63,4 @@ wf-recorder "${args[@]}" -f "$output" >/tmp/hypr-screen-recording.log 2>&1 &
 pid=$!
 echo "$pid" > "$PID_FILE"
 
-notify "Grabación iniciada"
+notify "Recording started"

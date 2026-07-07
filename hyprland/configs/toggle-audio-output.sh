@@ -14,7 +14,7 @@ notify() {
 }
 
 if ! command -v pactl >/dev/null 2>&1; then
-  notify "pactl no está disponible"
+  notify "pactl is not available"
   exit 1
 fi
 
@@ -22,7 +22,7 @@ current_sink="$(pactl get-default-sink 2>/dev/null || true)"
 mapfile -t sinks < <(pactl list short sinks | awk '{print $2}')
 
 if ((${#sinks[@]} == 0)); then
-  notify "No hay salidas de audio disponibles"
+  notify "No audio outputs available"
   exit 1
 fi
 
@@ -51,7 +51,7 @@ else
 fi
 
 if [[ -z "$next_sink" ]]; then
-  notify "Solo hay una salida conectada"
+  notify "Only one output is connected"
   exit 0
 fi
 
@@ -66,9 +66,9 @@ while read -r input _; do
 done < <(pactl list short sink-inputs)
 
 case "$next_sink" in
-  *HV-2008U*) label="Auriculares HV-2008U" ;;
+  *HV-2008U*) label="HV-2008U headphones" ;;
   *hdmi*) label="HDMI" ;;
   *) label="$next_sink" ;;
 esac
 
-notify "Salida cambiada a: $label"
+notify "Output changed to: $label"

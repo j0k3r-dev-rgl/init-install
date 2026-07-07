@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+notify_error() {
+  local message="$1"
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send --app-name="Hyprland" --urgency=critical --icon=dialog-error "Notas" "$message"
+  fi
+}
+
+if ! command -v eww >/dev/null 2>&1; then
+  notify_error "Eww no está instalado."
+  exit 127
+fi
+
+eww --config "$HOME/.config/eww" daemon >/dev/null 2>&1 || true
+sleep 0.15
+
+eww --config "$HOME/.config/eww" open --toggle notes-preview || {
+  notify_error "No pude mostrar/ocultar las notas."
+  exit 1
+}

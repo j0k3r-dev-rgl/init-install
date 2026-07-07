@@ -173,3 +173,48 @@
 .gpt-row.mauve .gpt-row-icon { color: #9dbbff; }
 .gpt-row.blue .gpt-row-icon { color: #00bfff; }
 .gpt-row.green .gpt-row-icon { color: #7df9c7; }
+
+.keybinds-panel {
+  padding: 10px;
+  background: linear-gradient(135deg, rgba(2, 12, 24, 0.96), rgba(7, 24, 44, 0.88));
+  border: 1px solid rgba(0, 191, 255, 0.46);
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 1px rgba(0, 191, 255, 0.12) inset,
+    0 0 22px rgba(0, 191, 255, 0.22),
+    0 8px 28px rgba(0, 0, 0, 0.42);
+}
+
+.keybinds-scroll {
+  min-width: 376px;
+  min-height: 760px;
+}
+
+.keybinds-label {
+  color: #dff7ff;
+  font-size: 12px;
+  padding: 3px;
+}
+
+.notes-panel {
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(2, 12, 24, 0.96), rgba(7, 24, 44, 0.88));
+  border: 1px solid rgba(0, 191, 255, 0.46);
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 1px rgba(0, 191, 255, 0.12) inset,
+    0 0 22px rgba(0, 191, 255, 0.22),
+    0 8px 28px rgba(0, 0, 0, 0.42);
+}
+
+.notes-scroll {
+  min-width: 332px;
+  min-height: 690px;
+}
+
+.notes-label {
+  color: #dff7ff;
+  font-size: 12px;
+  padding: 4px;
+}
+

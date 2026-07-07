@@ -1,0 +1,120 @@
+configuration {
+  show-icons: false;
+  font: "JetBrainsMono Nerd Font 10";
+}
+
+* {
+  bg: rgba(2, 12, 24, 0.96);
+  bg-soft: rgba(8, 30, 54, 0.82);
+  fg: #dff7ff;
+  muted: #78c7e8;
+  cyan: #00bfff;
+  cyan-bright: #00e5ff;
+  border: rgba(0, 191, 255, 0.52);
+  selected-bg: rgba(0, 191, 255, 0.22);
+  selected-border: rgba(0, 229, 255, 0.74);
+
+  background-color: transparent;
+  text-color: @fg;
+}
+
+window {
+  width: 560px;
+  location: center;
+  anchor: center;
+  fullscreen: false;
+  border: 1px;
+  border-color: @border;
+  border-radius: 14px;
+  padding: 0px;
+  background-color: @bg;
+}
+
+mainbox {
+  spacing: 7px;
+  padding: 10px;
+  background-color: transparent;
+  children: [ inputbar, message, listview ];
+}
+
+inputbar {
+  spacing: 8px;
+  padding: 7px 10px;
+  border: 1px;
+  border-color: rgba(0, 191, 255, 0.30);
+  border-radius: 10px;
+  background-color: @bg-soft;
+  children: [ prompt, entry ];
+}
+
+prompt {
+  padding: 0px 6px 0px 0px;
+  text-color: @cyan-bright;
+  font: "JetBrainsMono Nerd Font 10";
+}
+
+entry {
+  placeholder-color: @muted;
+  text-color: @fg;
+  cursor-color: @cyan-bright;
+  font: "JetBrainsMono Nerd Font 10";
+}
+
+message {
+  margin: 0px 2px;
+  padding: 0px;
+  background-color: transparent;
+}
+
+textbox {
+  text-color: @muted;
+  font: "JetBrainsMono Nerd Font 8";
+}
+
+listview {
+  lines: 8;
+  columns: 1;
+  fixed-height: false;
+  dynamic: true;
+  scrollbar: true;
+  spacing: 3px;
+  padding: 1px;
+  background-color: transparent;
+}
+
+scrollbar {
+  width: 4px;
+  handle-width: 4px;
+  border-radius: 8px;
+  background-color: rgba(0, 191, 255, 0.08);
+  handle-color: rgba(0, 191, 255, 0.46);
+}
+
+element {
+  padding: 5px 8px;
+  border: 1px;
+  border-color: transparent;
+  border-radius: 8px;
+  background-color: transparent;
+  text-color: @fg;
+}
+
+element normal.normal {
+  background-color: rgba(8, 30, 54, 0.34);
+}
+
+element alternate.normal {
+  background-color: rgba(7, 24, 44, 0.36);
+}
+
+element selected.normal {
+  background-color: @selected-bg;
+  border-color: @selected-border;
+  text-color: #ffffff;
+}
+
+element-text {
+  background-color: transparent;
+  text-color: inherit;
+  font: "JetBrainsMono Nerd Font 9";
+}

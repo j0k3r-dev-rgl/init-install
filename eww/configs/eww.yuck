@@ -10,6 +10,9 @@
 (defpoll gpt_secondary :interval "45s" "~/.config/eww/scripts/chatgpt-usage-info secondary")
 (defpoll gpt_extra     :interval "45s" "~/.config/eww/scripts/chatgpt-usage-info extra")
 (defpoll gpt_credits   :interval "45s" "~/.config/eww/scripts/chatgpt-usage-info credits")
+(defpoll keybinds_text :interval "2s" "~/.config/eww/scripts/hypr-keybinds-cheatsheet")
+(defpoll notes_preview_text :interval "2s" "~/.config/eww/scripts/notes-preview")
+
 
 (defwidget sys-chip [icon label value accent]
   (box :class "sys-chip ${accent}"
@@ -79,3 +82,54 @@
   :exclusive false
   :focusable false
   (chatgpt-usage))
+
+(defwidget keybinds-cheatsheet []
+  (box :class "keybinds-panel"
+       :orientation "v"
+       :space-evenly false
+    (scroll :class "keybinds-scroll"
+            :hscroll false
+            :vscroll true
+      (label :class "keybinds-label"
+             :halign "start"
+             :valign "start"
+             :wrap false
+             :markup keybinds_text))))
+
+(defwindow keybinds-cheatsheet
+  :monitor 0
+  :geometry (geometry :x "14px"
+                      :y "0px"
+                      :width "400px"
+                      :height "74%"
+                      :anchor "right center")
+  :stacking "overlay"
+  :exclusive false
+  :focusable false
+  (keybinds-cheatsheet))
+
+(defwidget notes-preview []
+  (box :class "notes-panel"
+       :orientation "v"
+       :space-evenly false
+    (scroll :class "notes-scroll"
+            :hscroll false
+            :vscroll true
+      (label :class "notes-label"
+             :halign "start"
+             :valign "start"
+             :wrap true
+             :markup notes_preview_text))))
+
+(defwindow notes-preview
+  :monitor 0
+  :geometry (geometry :x "14px"
+                      :y "0px"
+                      :width "360px"
+                      :height "68%"
+                      :anchor "left center")
+  :stacking "overlay"
+  :exclusive false
+  :focusable false
+  (notes-preview))
+

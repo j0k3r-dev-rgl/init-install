@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import html
+from pathlib import Path
+
+notes = Path.home() / ".notes/inbox.md"
+
+if not notes.exists():
+    print('<span foreground="#78c7e8">No notes yet. Use SUPER + N.</span>')
+    raise SystemExit
+
+lines = notes.read_text(encoding="utf-8", errors="replace").splitlines()
+if not lines:
+    print('<span foreground="#78c7e8">Empty note.</span>')
+    raise SystemExit
+
+max_lines = 42
+out = []
+out.append('<span foreground="#dff7ff" size="large" weight="900">󰎞  NOTES</span>')
+out.append('<span foreground="#78c7e8" size="small">~/.notes/inbox.md · SUPER + N to edit</span>')
+out.append('')
+
+for line in lines[:max_lines]:
+    escaped = html.escape(line)
+    if line.startswith('#'):
+        text = line.lstrip('#').strip() or 'Note'
+        out.append(f'<span foreground="#00e5ff" weight="900">{html.escape(text)}</span>')
+    elif line.startswith('- '):
+        out.append(f'<span foreground="#bff7ff">•</span> <span foreground="#dff7ff">{html.escape(line[2:])}</span>')
+    elif line.strip() == '':
+        out.append('')
+    else:
+        out.append(f'<span foreground="#dff7ff">{escaped}</span>')
+
+if len(lines) > max_lines:
+    out.append('')
+    out.append(f'<span foreground="#78c7e8">… {len(lines) - max_lines} more lines</span>')
+
+print('\n'.join(out).rstrip())

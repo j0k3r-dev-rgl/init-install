@@ -1,0 +1,329 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import html
+import os
+import re
+import shlex
+from pathlib import Path
+
+CONFIG = Path(os.environ.get("HYPR_KEYBINDS_FILE", Path.home() / ".config/hypr/keybinds.conf"))
+
+SECTION_IGNORE = {
+    "###################",
+    "MY PROGRAMS",
+    "KEYBINDINGS",
+}
+
+SECTION_RENAMES = {
+    "See https://wiki.hypr.land/Configuring/Keywords/": None,
+    "See https://wiki.hypr.land/Configuring/Binds/ for more": None,
+    "Set programs that you use": None,
+    "Example binds, see https://wiki.hypr.land/Configuring/Binds/ for more": "Apps and actions",
+    "Capturas de pantalla": "Screenshots and recording",
+    "Control de volumen gráfico": "System and utilities",
+    "Move focus with ALT + arrow keys": "Window focus",
+    "Resize active window with CTRL + SHIFT + arrow keys": "Resize window",
+    "Switch workspaces with mainMod + [0-9]": "Switch workspace",
+    "Move active window to a workspace with ALT + [0-9]": "Move window to workspace",
+    "Example special workspace (scratchpad)": "Scratchpad",
+    "Scroll through existing workspaces with mainMod + scroll": "Mouse workspace navigation",
+    "Move/resize windows with mainMod + LMB/RMB and dragging": "Mouse window controls",
+    "Laptop multimedia keys for volume and LCD brightness": "Media keys",
+    "Requires playerctl": "Media player",
+}
+
+KEY_NAMES = {
+    "Return": "Enter",
+    "backslash": "\\",
+    "Print": "Print",
+    "mouse_down": "Wheel ↓",
+    "mouse_up": "Wheel ↑",
+    "mouse:272": "Left click",
+    "mouse:273": "Right click",
+    "XF86AudioRaiseVolume": "Vol +",
+    "XF86AudioLowerVolume": "Vol -",
+    "XF86AudioMute": "Mute",
+    "XF86AudioMicMute": "Mic mute",
+    "XF86MonBrightnessUp": "Brightness +",
+    "XF86MonBrightnessDown": "Brightness -",
+    "XF86AudioNext": "Next",
+    "XF86AudioPause": "Play/Pause",
+    "XF86AudioPlay": "Play/Pause",
+    "XF86AudioPrev": "Prev",
+    "code:47": "ñ/;",
+}
+
+COMMENT_TRANSLATIONS = {
+    "Cerrar ventana activa": "Close active window",
+    "Historial del portapapeles": "Clipboard history",
+    "Nota rápida": "Quick note",
+    "Ver notas": "Notes preview",
+    "Terminal rápida": "Quick terminal",
+    "Buscar y abrir": "Find and open",
+    "Web Spotlight": "Web Spotlight",
+}
+
+COMMAND_DESCRIPTIONS = [
+    ("$menu", "Open app launcher"),
+    ("launcher.sh", "Open app launcher"),
+    ("$terminal", "Open Kitty terminal"),
+    ("ghostty", "Open Ghostty"),
+    ("killactive", "Close active window"),
+    ("hyprctl dispatch exit", "Exit Hyprland"),
+    ("systemctl poweroff", "Power off"),
+    ("systemctl reboot", "Reboot"),
+    ("$fileManager", "Open Yazi"),
+    ("yazi /run/media/$USER", "Mounted drives"),
+    ("discord", "Open Discord"),
+    ("remote-debugging-port=9222", "Chrome for Pi/CDP"),
+    ("--app-id=cinhimbnkkaeohfgghhklpknlkffjgod", "Open web app"),
+    ("google-chrome", "Open Chrome"),
+    ("kitty -e nvim", "Open Neovim"),
+    ("toggle-floating-centered.sh", "Centered floating / tiled"),
+    ("fullscreen", "Fullscreen"),
+    ("pseudo", "Pseudo tiling"),
+    ("togglesplit", "Toggle split"),
+    ("toggle-system-widget", "System widget"),
+    ("toggle-chatgpt-usage", "ChatGPT quota widget"),
+    ("toggle-keybinds-cheatsheet", "Show/hide keybinds"),
+    ("pavucontrol", "Volume control"),
+    ("btop", "System monitor"),
+    ("toggle-audio-output", "Switch audio output"),
+    ("clipboard-history.sh", "Clipboard history"),
+    ("web-spotlight.sh", "Web Spotlight"),
+    ("open-quick-note.sh", "Quick note"),
+    ("toggle-notes-preview", "Notes preview"),
+    ("quick-terminal.sh", "Quick terminal"),
+    ("find-open.sh", "Find and open"),
+    ("movefocus", "Move focus"),
+    ("resizeactive", "Resize window"),
+    ("workspace", "Go to workspace"),
+    ("movetoworkspace", "Move window"),
+    ("togglespecialworkspace", "Show/hide scratchpad"),
+    ("special:magic", "Send to scratchpad"),
+    ("movewindow", "Move window with mouse"),
+    ("resizewindow", "Resize with mouse"),
+    ("wpctl set-volume", "Volume"),
+    ("wpctl set-mute @DEFAULT_AUDIO_SINK@", "Mute audio"),
+    ("wpctl set-mute @DEFAULT_AUDIO_SOURCE@", "Mute microphone"),
+    ("brightnessctl", "Screen brightness"),
+    ("playerctl next", "Next track"),
+    ("playerctl play-pause", "Play/pause"),
+    ("playerctl previous", "Previous track"),
+    ("flameshot gui", "Screenshot"),
+    ("record-screen.sh", "Record screen"),
+]
+
+
+def split_hypr_args(raw: str) -> list[str]:
+    parts = []
+    current = []
+    in_single = False
+    in_double = False
+    escape = False
+
+    for ch in raw:
+        if escape:
+            current.append(ch)
+            escape = False
+            continue
+        if ch == "\\":
+            current.append(ch)
+            escape = True
+            continue
+        if ch == "'" and not in_double:
+            in_single = not in_single
+            current.append(ch)
+            continue
+        if ch == '"' and not in_single:
+            in_double = not in_double
+            current.append(ch)
+            continue
+        if ch == "," and not in_single and not in_double:
+            parts.append("".join(current).strip())
+            current = []
+        else:
+            current.append(ch)
+    parts.append("".join(current).strip())
+    return parts
+
+
+def strip_inline_comment(line: str) -> tuple[str, str]:
+    try:
+        tokens = shlex.split(line, comments=True, posix=True)
+    except ValueError:
+        tokens = []
+
+    if "#" not in line:
+        return line.rstrip(), ""
+
+    in_single = in_double = False
+    for i, ch in enumerate(line):
+        if ch == "'" and not in_double:
+            in_single = not in_single
+        elif ch == '"' and not in_single:
+            in_double = not in_double
+        elif ch == "#" and not in_single and not in_double:
+            return line[:i].rstrip(), line[i + 1 :].strip()
+    return line.rstrip(), ""
+
+
+def readable_mods(mods: str, variables: dict[str, str]) -> str:
+    mods = mods.strip()
+    if not mods:
+        return ""
+    for name, value in variables.items():
+        mods = mods.replace(name, value)
+    mods = re.sub(r"\s+", " + ", mods.strip())
+    return mods
+
+
+def readable_key(key: str) -> str:
+    key = key.strip()
+    return KEY_NAMES.get(key, key)
+
+
+def describe(dispatcher: str, params: str, comment: str) -> str:
+    if comment and comment.lower() not in {"dwindle"}:
+        return COMMENT_TRANSLATIONS.get(comment, comment)
+
+    if dispatcher == "movefocus":
+        return {
+            "l": "Focus left",
+            "r": "Focus right",
+            "u": "Focus up",
+            "d": "Focus down",
+        }.get(params.strip(), "Move focus")
+
+    if dispatcher == "resizeactive":
+        values = params.replace(",", " ").split()
+        if len(values) >= 2:
+            x, y = values[0], values[1]
+            if y.startswith("-"):
+                return "Decrease height"
+            if y != "0":
+                return "Increase height"
+            if x.startswith("-"):
+                return "Decrease width"
+            if x != "0":
+                return "Increase width"
+        return "Resize window"
+
+    if dispatcher == "workspace":
+        clean = params.strip()
+        if clean.startswith("special:"):
+            return "Show/hide scratchpad"
+        if clean.startswith("e+"):
+            return "Next workspace"
+        if clean.startswith("e-"):
+            return "Previous workspace"
+        return f"Go to workspace {clean}"
+
+    if dispatcher == "movetoworkspace":
+        clean = params.strip()
+        if clean.startswith("special:"):
+            return "Send to scratchpad"
+        return f"Move to workspace {clean}"
+
+    haystack = f"{dispatcher} {params}"
+    for needle, text in COMMAND_DESCRIPTIONS:
+        if needle in haystack:
+            return text
+    if dispatcher == "exec":
+        return params.replace("$HOME", "~")
+    return f"{dispatcher} {params}".strip()
+
+
+def section_name(comment: str) -> str | None:
+    clean = comment.strip("# ").strip()
+    if not clean or clean in SECTION_IGNORE:
+        return None
+    return SECTION_RENAMES.get(clean, clean)
+
+
+def parse() -> list[tuple[str, list[tuple[str, str]]]]:
+    if not CONFIG.exists():
+        return [("Error", [("Sin archivo", f"No existe {CONFIG}")])]
+
+    variables: dict[str, str] = {}
+    current = "General"
+    sections: list[tuple[str, list[tuple[str, str]]]] = []
+    rows: list[tuple[str, str]] = []
+
+    def flush() -> None:
+        nonlocal rows
+        if rows:
+            sections.append((current, rows))
+            rows = []
+
+    for raw_line in CONFIG.read_text(encoding="utf-8").splitlines():
+        stripped = raw_line.strip()
+        if not stripped:
+            continue
+
+        if stripped.startswith("#"):
+            maybe = section_name(stripped)
+            if maybe:
+                flush()
+                current = maybe
+            continue
+
+        if stripped.startswith("$") and "=" in stripped:
+            name, value = stripped.split("=", 1)
+            variables[name.strip()] = value.strip().split("#", 1)[0].strip()
+            continue
+
+        line, comment = strip_inline_comment(raw_line)
+        if "=" not in line:
+            continue
+        kind, rest = line.split("=", 1)
+        kind = kind.strip()
+        if not kind.startswith("bind"):
+            continue
+
+        parts = split_hypr_args(rest)
+        if len(parts) < 3:
+            continue
+        mods, key, dispatcher = parts[0], parts[1], parts[2]
+        params = ", ".join(parts[3:]) if len(parts) > 3 else ""
+
+        combo_parts = [readable_mods(mods, variables), readable_key(key)]
+        combo = " + ".join(part for part in combo_parts if part)
+        rows.append((combo, describe(dispatcher, params, comment)))
+
+    flush()
+    return sections
+
+
+def render() -> str:
+    sections = parse()
+    out: list[str] = []
+    out.append('<span foreground="#dff7ff" size="large" weight="900">󰌌  KEYBINDS</span>')
+    out.append('<span foreground="#78c7e8" size="small">SUPER + K to hide · source: keybinds.conf</span>')
+    out.append("")
+
+    for title, rows in sections:
+        if title == "Switch workspace":
+            rows = [("SUPER + #", "Go to workspace")]
+        elif title == "Move window to workspace":
+            rows = [("ALT + #", "Move window")]
+
+
+        out.append(f'<span foreground="#00e5ff" weight="900">▸ {html.escape(title.upper())}</span>')
+        out.append('<span foreground="#4f8099">────────────────────────────────────</span>')
+        for combo, desc in rows:
+            combo_text = html.escape(combo.ljust(18))
+            desc_text = html.escape(desc)
+            out.append(
+                f'<span foreground="#bff7ff" background="#073149" weight="900"> {combo_text} </span>'
+                f' <span foreground="#4f8099">│</span> '
+                f'<span foreground="#c8efff">{desc_text}</span>'
+            )
+        out.append("")
+
+    return "\n".join(out).rstrip()
+
+
+if __name__ == "__main__":
+    print(render())
