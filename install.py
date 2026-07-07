@@ -177,10 +177,21 @@ def sync_category_badges(direction: str, states: Iterable) -> dict[str, str]:
     }
 
 
+def restart_hyprpaper() -> list[str]:
+    if not command_exists("hyprpaper"):
+        return []
+    subprocess.run(["pkill", "hyprpaper"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+    subprocess.Popen(["hyprpaper"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    return ["[POST] Hyprpaper restarted"]
+
+
 def run_post_config_sync_hook(direction: str, target: ConfigTarget) -> list[str]:
+    messages: list[str] = []
     if direction == "import" and target.key == "hyprland" and command_exists("hyprctl"):
-        return ["[POST] Hyprland reload", *run_command(["hyprctl", "reload"])]
-    return []
+        messages.extend(["[POST] Hyprland reload", *run_command(["hyprctl", "reload"])])
+    if direction == "import" and target.key in {"hyprland", "wallpapers"}:
+        messages.extend(restart_hyprpaper())
+    return messages
 
 
 BASE_SECTION = Section(

@@ -32,6 +32,14 @@ class DesktopConfigTests(unittest.TestCase):
         self.assertIn('target.key == "hyprland"', source)
         self.assertIn('["hyprctl", "reload"]', source)
 
+    def test_wallpaper_related_import_restarts_hyprpaper_after_sync(self):
+        source = INSTALL_PY.read_text(encoding="utf-8")
+
+        self.assertIn('target.key in {"hyprland", "wallpapers"}', source)
+        self.assertIn('command_exists("hyprpaper")', source)
+        self.assertIn('["pkill", "hyprpaper"]', source)
+        self.assertIn('["hyprpaper"]', source)
+
     def test_hyprland_keybinds_use_configured_menu(self):
         keybinds = HYPR_KEYBINDS.read_text(encoding="utf-8")
 
