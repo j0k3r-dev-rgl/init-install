@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+terminal="kitty"
+terminal_class=""
+workdir=""
+dry_run=0
+
+usage() {
+  cat >&2 <<'EOF'
+Usage: launch-terminal-app [options] [--] [command [args...]]
+
+Options:
+  --terminal <name>          Terminal emulator to launch (default: kitty)
+  --class <class>            Window class/app-id when supported by the terminal
+  --working-directory <dir>  Directory to start in
+  --dry-run                  Print the command that would be executed
+  -h, --help                 Show this help
+
+App commands are executed through a login zsh that sources
+~/.config/zsh/env.zsh, so Hyprland shortcuts get PATH and tool variables
+without loading prompt/plugins. If no app command is provided, an interactive
+login zsh is opened.
+EOF
+}
+
+quote_cmd() {
+  printf '%q ' "$@"
+  printf '\n'
+}
+
+while (($#)); do
+  case "$1" in
+    --terminal)
+      [[ $# -ge 2 ]] || { echo "Missing value for --terminal" >&2; exit 2; }
+      terminal="$2"
+      shift 2
+      ;;
+    --class)
+      [[ $# -ge 2 ]] || { echo "Missing value for --class" >&2; exit 2; }
+      terminal_class="$2"
+      shift 2
+      ;;
+    --working-directory|--working-dir|--cwd)
+      [[ $# -ge 2 ]] || { echo "Missing value for $1" >&2; exit 2; }
+      workdir="$2"
+      shift 2
+      ;;
+    --dry-run)
+      dry_run=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+if [[ -n "$workdir" && ! -d "$workdir" ]]; then
+  echo "Working directory does not exist: $workdir" >&2
+  exit 1
+fi
+
+terminal_cmd=("$terminal")
+case "$terminal" in
+  kitty)
+    [[ -z "$terminal_class" ]] || terminal_cmd+=(--class "$terminal_class")
+    [[ -z "$workdir" ]] || terminal_cmd+=(--working-directory "$workdir")
+    ;;
+  ghostty)
+    # Ghostty reliably supports `-e`; keep shell setup portable and let zsh cd.
+    ;;
+  *)
+    # Unknown terminals vary in their CLI flags; keep only the portable `-e` path.
+    ;;
+esac
+
+if (($#)); then
+  # Load only login/env setup, not interactive prompt/plugins, then exec the app.
+  if [[ -n "$workdir" ]]; then
+    terminal_cmd+=(-e zsh -lc '[[ -r "$HOME/.config/zsh/env.zsh" ]] && source "$HOME/.config/zsh/env.zsh"; cd "$1" || exit; shift; exec "$@"' zsh "$workdir" "$@")
+  else
+    terminal_cmd+=(-e zsh -lc '[[ -r "$HOME/.config/zsh/env.zsh" ]] && source "$HOME/.config/zsh/env.zsh"; exec "$@"' zsh "$@")
+  fi
+else
+  # Open a real interactive login shell for plain terminal shortcuts.
+  if [[ -n "$workdir" ]]; then
+    terminal_cmd+=(-e zsh -lc '[[ -r "$HOME/.config/zsh/env.zsh" ]] && source "$HOME/.config/zsh/env.zsh"; cd "$1" || exit; exec zsh -l' zsh "$workdir")
+  else
+    terminal_cmd+=(-e zsh -l)
+  fi
+fi
+
+if ((dry_run)); then
+  quote_cmd "${terminal_cmd[@]}"
+  exit 0
+fi
+
+exec "${terminal_cmd[@]}"

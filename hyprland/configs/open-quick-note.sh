@@ -13,4 +13,4 @@ if [[ ! -f "$notes_file" ]]; then
 EOF
 fi
 
-exec kitty --class quick-notes -e nvim "$notes_file"
+exec "$HOME/.config/hypr/launch-terminal-app" --class quick-notes -- nvim "$notes_file"

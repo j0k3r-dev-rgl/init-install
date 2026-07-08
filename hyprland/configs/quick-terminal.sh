@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-exec kitty --class quick-terminal
+exec "$HOME/.config/hypr/launch-terminal-app" --class quick-terminal

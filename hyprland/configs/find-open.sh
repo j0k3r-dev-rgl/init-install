@@ -5,6 +5,7 @@ root="$HOME"
 theme="$HOME/.config/rofi/productivity-menu.rasi"
 rofi_theme_str='window { width: 860px; } listview { lines: 11; }'
 small_theme_str='window { width: 380px; } listview { lines: 8; }'
+launch_terminal_app="$HOME/.config/hypr/launch-terminal-app"
 
 modes=(files configs places projects)
 mode_index=0
@@ -298,10 +299,10 @@ repo_root_for() {
 open_project_workspace() {
   local dir="$1"
 
-  kitty --class project-pi --working-directory "$dir" -e pi >/dev/null 2>&1 &
+  "$launch_terminal_app" --class project-pi --working-directory "$dir" -- pi >/dev/null 2>&1 &
   sleep 0.35
   hyprctl dispatch layoutmsg preselect r >/dev/null 2>&1 || true
-  kitty --class project-nvim --working-directory "$dir" -e nvim . >/dev/null 2>&1 &
+  "$launch_terminal_app" --class project-nvim --working-directory "$dir" -- nvim . >/dev/null 2>&1 &
   sleep 0.15
   hyprctl dispatch layoutmsg preselect none >/dev/null 2>&1 || true
 }
@@ -340,21 +341,21 @@ open_actions() {
       open_project_workspace "${repo_root:-$workdir}"
       ;;
     terminal)
-      exec kitty --working-directory "$workdir"
+      exec "$launch_terminal_app" --working-directory "$workdir"
       ;;
     nvim)
-      exec kitty --class finder-nvim --working-directory "$workdir" -e nvim "$target"
+      exec "$launch_terminal_app" --class finder-nvim --working-directory "$workdir" -- nvim "$target"
       ;;
     pi)
-      exec kitty --class finder-pi --working-directory "$workdir" -e pi
+      exec "$launch_terminal_app" --class finder-pi --working-directory "$workdir" -- pi
       ;;
     yazi)
-      exec kitty --class finder-yazi --working-directory "$workdir" -e yazi "$target"
+      exec "$launch_terminal_app" --class finder-yazi --working-directory "$workdir" -- yazi "$target"
       ;;
     "find files")
       local found_file
       found_file="$(pick_from_scope "$workdir" f '󰱼 Files in scope')" || exit 0
-      exec kitty --class finder-nvim --working-directory "$workdir" -e nvim "$found_file"
+      exec "$launch_terminal_app" --class finder-nvim --working-directory "$workdir" -- nvim "$found_file"
       ;;
     "find folders")
       local found_dir
